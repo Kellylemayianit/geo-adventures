@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geo Adventures — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===================== TOKENS ===================== */
+  :root{
+    --bg:        #12140f;
+    --panel:     #191c15;
+    --panel-hi:  #20241b;
+    --line:      #33392b;
+    --line-hi:   #4a5240;
+    --ink:       #ece8dc;
+    --ink-dim:   #a9ab9b;
+    --ink-faint: #6d7263;
+    --ochre:     #c68a3d;
+    --ochre-soft:#e0b26e;
+    --moss:      #7c9467;
+    --clay:      #b45b3c;
+    --danger:    #c1594f;
+    --ok:        #7fa47a;
+    --radius:    3px;
+    --font-display:'Newsreader', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-body);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  ::selection{background:rgba(198,138,61,.35);}
+
+  /* contour watermark — signature structural device, not decoration-for-its-own-sake:
+     each contour ring = 1000m elevation, echoes the coordinate/elevation labels used throughout */
+  .topo{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.035' stroke-width='1'%3E%3Cellipse cx='150' cy='160' rx='90' ry='60'/%3E%3Cellipse cx='150' cy='160' rx='150' ry='105'/%3E%3Cellipse cx='150' cy='160' rx='210' ry='150'/%3E%3Cellipse cx='150' cy='160' rx='270' ry='195'/%3E%3Cellipse cx='560' cy='500' rx='80' ry='55'/%3E%3Cellipse cx='560' cy='500' rx='140' ry='100'/%3E%3Cellipse cx='560' cy='500' rx='200' ry='145'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:700px 700px;
+  }
+  #app{position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  main{flex:1;}
+  .section{padding:56px 0;}
+  .section-head{margin-bottom:30px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap;}
+  .grid{display:grid; gap:18px;}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .divider{height:1px; background:var(--line); margin:22px 0;}
+  .empty-state{padding:50px 20px; text-align:center; color:var(--ink-faint);}
+  .link-underline{text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line-hi);}
+  .center-note{text-align:center; margin-top:14px; font-size:13px; color:var(--ink-faint);}
+
+  /* flat panels — solid fill + hairline border, no blur, no glass */
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); }
+  .panel-hi{ background:var(--panel-hi); border:1px solid var(--line-hi); border-radius:var(--radius); }
+
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ochre-soft); opacity:.9;}
+  h1,h2,h3{font-family:var(--font-display); font-weight:500; margin:0; color:var(--ink); line-height:1.15;}
+  .h1{font-size:50px; letter-spacing:-.3px;}
+  .h2{font-size:30px;}
+  .h3{font-size:20px;}
+  p{line-height:1.65; color:var(--ink-dim); margin:0;}
+  .coord{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint); letter-spacing:.4px;}
+
+  /* ===================== HEADER ===================== */
+  header.site{position:sticky; top:0; z-index:50; padding:14px 0; background:var(--bg); border-bottom:1px solid var(--line);}
+  .header-inner{display:flex; align-items:center; justify-content:space-between; padding:6px 0;}
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-size:21px; font-weight:600;}
+  .brand .mark{width:34px; height:34px; border-radius:var(--radius); background:var(--ochre); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px; font-weight:600; color:#181a12;}
+  nav.main{display:flex; align-items:center; gap:2px; flex-wrap:wrap;}
+  nav.main a{padding:8px 13px; border-radius:var(--radius); font-size:14px; color:var(--ink-dim); border:1px solid transparent;}
+  nav.main a:hover{color:var(--ink);}
+  nav.main a.active{color:var(--ink); border-color:var(--line-hi); background:var(--panel);}
+  .header-actions{display:flex; align-items:center; gap:10px;}
+  .badge-role{padding:4px 10px; border-radius:var(--radius); font-size:11px; font-family:var(--font-mono); background:rgba(198,138,61,.14); color:var(--ochre-soft); border:1px solid rgba(198,138,61,.3);}
+
+  /* ===================== BUTTONS ===================== */
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:var(--radius); font-size:14px; font-weight:600; border:1px solid transparent; transition:all .12s ease; white-space:nowrap;}
+  .btn-ochre{background:var(--ochre); color:#181a12;}
+  .btn-ochre:hover{background:var(--ochre-soft);}
+  .btn-outline{background:transparent; border-color:var(--line-hi); color:var(--ink);}
+  .btn-outline:hover{border-color:var(--ochre); color:var(--ochre-soft);}
+  .btn-ghost{background:transparent; color:var(--ink-dim); border:1px solid transparent;}
+  .btn-ghost:hover{color:var(--ink);}
+  .btn-sm{padding:6px 12px; font-size:12.5px;}
+  .btn-block{width:100%;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .pill{display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:var(--radius); font-size:11.5px; font-family:var(--font-mono); border:1px solid var(--line-hi); color:var(--ink-dim);}
+  .pill.gold{color:var(--ochre-soft); border-color:rgba(198,138,61,.4); background:rgba(198,138,61,.08);}
+  .pill.green{color:#a9c4a6; border-color:rgba(124,148,103,.4); background:rgba(124,148,103,.08);}
+  .pill.clay{color:#e0a480; border-color:rgba(180,91,60,.4); background:rgba(180,91,60,.08);}
+
+  .filter-bar{display:flex; gap:8px; flex-wrap:wrap; padding:12px 14px; margin-bottom:24px;}
+  .filter-bar .chip{padding:7px 13px; border-radius:var(--radius); font-size:13px; color:var(--ink-dim); border:1px solid var(--line); cursor:pointer;}
+  .filter-bar .chip.active{background:var(--panel-hi); border-color:var(--ochre); color:var(--ink);}
+
+  .toggle-group{display:flex; padding:3px; border-radius:var(--radius); border:1px solid var(--line);}
+  .toggle-group button{padding:9px 18px; border-radius:2px; font-size:13.5px; color:var(--ink-dim); font-weight:600; background:transparent; border:none;}
+  .toggle-group button.active{background:var(--panel-hi); color:var(--ink);}
+
+  /* ===================== HERO ===================== */
+  .hero{position:relative; padding:64px 0 36px;}
+  .hero-panel{padding:52px; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center;}
+  .hero-copy p.lead{font-size:16px; margin-top:14px; max-width:460px;}
+  .hero-cta{display:flex; gap:12px; margin-top:24px;}
+  .hero-stats{display:flex; gap:26px; margin-top:32px;}
+  .hero-stat .num{font-family:var(--font-mono); font-size:22px; color:var(--ochre-soft);}
+  .hero-stat .lbl{font-size:11px; color:var(--ink-faint); font-family:var(--font-mono); letter-spacing:.4px; text-transform:uppercase;}
+  .hero-visual{border-radius:var(--radius); height:320px; background:var(--panel-hi); border:1px solid var(--line); position:relative; display:flex; align-items:flex-end; overflow:hidden;}
+  .hero-visual svg{position:absolute; inset:0; width:100%; height:100%; opacity:.5;}
+  .hero-visual .float-card{position:relative; margin:16px; padding:14px 16px; width:calc(100% - 32px);}
+
+  @media (max-width:900px){ .hero-panel{grid-template-columns:1fr;} .hero-visual{height:200px;} }
+  @media (max-width:560px){ .hero-panel{padding:26px;} .h1{font-size:36px;} .wrap{padding:0 16px;} .grid-3,.grid-4{grid-template-columns:repeat(2,1fr);} }
+
+  /* ===================== CARD ===================== */
+  .card{overflow:hidden; display:flex; flex-direction:column; transition:border-color .15s ease;}
+  .card:hover{border-color:var(--ochre);}
+  .card-img{height:150px; background-size:cover; background-position:center; position:relative; border-bottom:1px solid var(--line);}
+  .card-img .tag{position:absolute; top:10px; left:10px; padding:5px 9px; border-radius:var(--radius); font-family:var(--font-mono); font-size:10px; letter-spacing:.5px; text-transform:uppercase; background:var(--bg); border:1px solid var(--line-hi); color:var(--ochre-soft);}
+  .card-body{padding:16px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .card-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+  .card-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:12px; border-top:1px solid var(--line);}
+  .price{font-family:var(--font-mono); font-size:15px; color:var(--ochre-soft); font-weight:500;}
+  .price small{color:var(--ink-faint); font-size:11px;}
+
+  /* ===================== BOOKING / FORMS ===================== */
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+  .field label{font-size:12px; color:var(--ink-faint); font-family:var(--font-mono); letter-spacing:.3px;}
+  .field input,.field select,.field textarea{padding:10px 13px; border-radius:var(--radius); background:var(--bg); border:1px solid var(--line-hi); color:var(--ink); font-size:14px; outline:none;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ochre);}
+  .field textarea{resize:vertical; min-height:70px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .checkbox-card{display:flex; align-items:center; gap:10px; padding:11px 13px; border-radius:var(--radius); border:1px solid var(--line); cursor:pointer;}
+  .checkbox-card:hover{border-color:var(--line-hi);}
+  .checkbox-card.checked{border-color:var(--ochre); background:rgba(198,138,61,.08);}
+  .checkbox-card input{accent-color:var(--ochre);}
+  .demo-note{padding:10px 14px; border-radius:var(--radius); background:rgba(198,138,61,.08); border:1px solid rgba(198,138,61,.28); font-size:12.5px; color:var(--ochre-soft); margin-bottom:16px;}
+
+  /* ===================== DASHBOARD ===================== */
+  .dash-layout{display:grid; grid-template-columns:200px 1fr; gap:22px; align-items:flex-start;}
+  .dash-sidebar{padding:14px; position:sticky; top:90px;}
+  .dash-sidebar a{display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:var(--radius); font-size:13.5px; color:var(--ink-dim); margin-bottom:4px;}
+  .dash-sidebar a:hover{background:rgba(255,255,255,.04); color:var(--ink);}
+  .dash-sidebar a.active{background:var(--panel-hi); color:var(--ink); border:1px solid var(--line-hi);}
+  .stat-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+  .stat-card{padding:16px 18px;}
+  .stat-card .num{font-family:var(--font-mono); font-size:24px; color:var(--ochre-soft);}
+  .stat-card .lbl{font-size:11.5px; color:var(--ink-faint); margin-top:4px;}
+  .stat-card .delta{font-size:11px; color:var(--ok); margin-top:6px; font-family:var(--font-mono);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{text-align:left; padding:9px 12px; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); border-bottom:1px solid var(--line);}
+  td{padding:12px; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  .status-badge{padding:4px 9px; border-radius:var(--radius); font-size:10.5px; font-family:var(--font-mono);}
+  .status-pending{background:rgba(198,138,61,.14); color:var(--ochre-soft);}
+  .status-confirmed{background:rgba(124,148,103,.16); color:#a9c4a6;}
+  .status-cancelled{background:rgba(193,89,79,.14); color:#e6a89f;}
+  @media (max-width:900px){ .dash-layout{grid-template-columns:1fr;} .stat-cards{grid-template-columns:repeat(2,1fr);} }
+
+  /* ===================== FOOTER ===================== */
+  footer.site{padding:44px 0 36px; margin-top:36px; border-top:1px solid var(--line);}
+  .footer-panel{padding:0; display:flex; justify-content:space-between; gap:28px; flex-wrap:wrap;}
+  .footer-cols{display:flex; gap:54px; flex-wrap:wrap;}
+  .footer-col h4{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-faint); margin-bottom:12px;}
+  .footer-col a,.footer-col div{display:block; font-size:13.5px; color:var(--ink-dim); margin-bottom:8px;}
+  .footer-col a:hover{color:var(--ochre-soft);}
+  .channel-links{display:flex; gap:9px; margin-top:8px;}
+  .channel-links a{width:34px; height:34px; border-radius:var(--radius); border:1px solid var(--line-hi); display:flex; align-items:center; justify-content:center; font-size:14px;}
+  .channel-links a:hover{background:var(--panel-hi);}
+
+  /* ===================== TOAST ===================== */
+  .toast{position:fixed; bottom:24px; right:24px; z-index:200; padding:13px 18px; display:flex; align-items:center; gap:10px; transform:translateY(16px); opacity:0; transition:all .25s ease; pointer-events:none;}
+  .toast.show{transform:translateY(0); opacity:1;}
+
+  ::-webkit-scrollbar{width:9px; height:9px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--line-hi); border-radius:8px;}
+</style>
+</head>
+<body>
+<div class="topo"></div>
+<div id="app"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ==========================================================
+   GEO ADVENTURES — single-file prototype
+   Flat, no glassmorphism. Mirrors the original Wild Kenya
+   Safaris SPA structure (same routes/data shape) as one file
+   for review purposes. Data is in-memory mock data.
+   ========================================================== */
+
+/* ---------------- MOCK DATA ---------------- */
+const PARKS = [
+  { id:'amboseli', name:'Amboseli National Park', coord:'2.6529° S, 37.2606° E', img:'https://images.unsplash.com/photo-1547970810-dc1eac37d174?auto=format&fit=crop&w=900&q=60', bestTime:'Jun – Oct', entranceFee:60, highlights:['Kilimanjaro views','Elephant herds','Swamps'], wildlife:['Elephant','Lion','Cheetah','Hyena'], description:'Amboseli sits in the shadow of Kilimanjaro and is known for its large, free-ranging elephant herds against a backdrop of Africa\'s tallest peak.' },
+  { id:'mara', name:'Maasai Mara National Reserve', coord:'1.4061° S, 35.0117° E', img:'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=900&q=60', bestTime:'Jul – Sep', entranceFee:80, highlights:['Great Migration','Big Five','Balloon safaris'], wildlife:['Wildebeest','Lion','Leopard','Rhino'], description:'The Mara is the northern half of the Serengeti ecosystem, famous for the Great Migration and some of the densest predator populations in Africa.' },
+  { id:'tsavo-e', name:'Tsavo East National Park', coord:'3.3833° S, 38.5667° E', img:'https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=900&q=60', bestTime:'Jan – Feb', entranceFee:52, highlights:['Red elephants','Yatta plateau','Galana river'], wildlife:['Elephant','Lion','Crocodile','Oryx'], description:'Tsavo East is vast open savanna, home to elephants dyed red by the local dust and the world\'s longest lava flow, the Yatta Plateau.' },
+  { id:'tsavo-w', name:'Tsavo West National Park', coord:'3.4167° S, 38.1000° E', img:'https://images.unsplash.com/photo-1535941339077-2dd1c7963098?auto=format&fit=crop&w=900&q=60', bestTime:'Jun – Oct', entranceFee:52, highlights:['Mzima Springs','Volcanic hills','Rhino sanctuary'], wildlife:['Rhino','Hippo','Leopard','Buffalo'], description:'More rugged and varied than its eastern half, Tsavo West offers crystal-clear springs, lava fields, and a dedicated black rhino sanctuary.' },
+];
+
+const PACKAGES = [
+  { id:'pkg-migration', name:'Great Migration Explorer', parks:['mara'], img:PARKS[1].img, duration:5, price:2450, rating:4.9, accommodationTier:'luxury', transport:'jeep', itinerary:['Arrive Nairobi, transfer to the Mara','Full-day game drive, river crossings','Balloon safari + bush breakfast','Cultural visit to a Maasai village','Final drive & departure'], included:['All park fees','4×4 game drives','Luxury tented camp'], notIncluded:['International flights','Travel insurance','Alcoholic drinks'] },
+  { id:'pkg-kili-elephants', name:'Kilimanjaro & Elephants', parks:['amboseli'], img:PARKS[0].img, duration:3, price:1180, rating:4.7, accommodationTier:'mid', transport:'jeep', itinerary:['Arrive Amboseli, sunset game drive','Full-day photography safari','Morning drive, depart'], included:['Park fees','Game drives','Mid-range lodge'], notIncluded:['Flights','Gratuities'] },
+  { id:'pkg-red-earth', name:'Red Earth Tsavo Circuit', parks:['tsavo-e','tsavo-w'], img:PARKS[2].img, duration:6, price:1980, rating:4.6, accommodationTier:'mid', transport:'jeep', itinerary:['Arrive Tsavo East','Yatta Plateau & red elephants','Transfer to Tsavo West','Mzima Springs boardwalk','Rhino sanctuary tracking','Depart'], included:['Park fees','Transfers between parks','Game drives'], notIncluded:['Flights','Optional balloon safari'] },
+  { id:'pkg-budget-mara', name:'Budget Mara Weekender', parks:['mara'], img:PARKS[1].img, duration:2, price:640, rating:4.3, accommodationTier:'budget', transport:'motorbike', itinerary:['Arrive, afternoon drive','Morning drive, depart'], included:['Park fees','Shared game drives'], notIncluded:['Meals outside camp','Flights'] },
+];
+
+const ACCOMMODATIONS = [
+  { id:'acc-1', name:'Kilima Tented Camp', parkId:'amboseli', tier:'mid', price:180, img:PARKS[0].img },
+  { id:'acc-2', name:'Migration River Lodge', parkId:'mara', tier:'luxury', price:420, img:PARKS[1].img },
+  { id:'acc-3', name:'Yatta Ridge Camp', parkId:'tsavo-e', tier:'budget', price:75, img:PARKS[2].img },
+  { id:'acc-4', name:'Mzima Springs Lodge', parkId:'tsavo-w', tier:'mid', price:190, img:PARKS[3].img },
+  { id:'acc-5', name:'Savanna Star Camp', parkId:'mara', tier:'budget', price:90, img:PARKS[1].img },
+  { id:'acc-6', name:'Elephant Watch House', parkId:'amboseli', tier:'luxury', price:510, img:PARKS[0].img },
+  { id:'acc-7', name:'Rhino Ridge Retreat', parkId:'tsavo-w', tier:'luxury', price:465, img:PARKS[3].img },
+  { id:'acc-8', name:'Galana River Camp', parkId:'tsavo-e', tier:'mid', price:165, img:PARKS[2].img },
+];
+
+const ADDONS = [
+  { id:'add-1', name:'Hot air balloon safari', price:180 },
+  { id:'add-2', name:'Maasai village visit', price:40 },
+  { id:'add-3', name:'Private guide upgrade', price:120 },
+  { id:'add-4', name:'Airstrip transfer', price:90 },
+];
+
+const REVIEWS = [
+  { parkId:'mara', guestName:'Sarah Mwangi', rating:5, comment:'The migration crossing was the single best thing I have ever watched.' },
+  { parkId:'amboseli', guestName:'Tom Delacroix', rating:5, comment:'Elephants with Kilimanjaro behind them — worth every hour of the drive.' },
+];
+
+let BOOKINGS = [
+  { id:'BK-1042', guestEmail:'sarah@example.com', packageId:'pkg-migration', groupSize:2, startDate:'2026-09-14', status:'confirmed', totalPrice:4900, createdAt:'2026-07-01' },
+  { id:'BK-1043', guestEmail:'sarah@example.com', packageId:'pkg-kili-elephants', groupSize:1, startDate:'2026-05-02', status:'confirmed', totalPrice:1180, createdAt:'2026-03-11' },
+  { id:'BK-1044', guestEmail:'lena@example.com', packageId:'pkg-red-earth', groupSize:4, startDate:'2026-10-20', status:'pending', totalPrice:7920, createdAt:'2026-08-02' },
+  { id:'BK-1045', guestEmail:'jomo@example.com', packageId:'pkg-budget-mara', groupSize:2, startDate:'2026-04-11', status:'cancelled', totalPrice:1280, createdAt:'2026-02-19' },
+];
+
+const TODAY = '2026-08-17';
+
+const CONTACT = { whatsappNumber:'254700000000', email:'info@geoadventures.travel' };
+function waLink(text){ return `https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(text)}`; }
+
+/* ---------------- HELPERS ---------------- */
+const $ = (sel, root=document) => root.querySelector(sel);
+const money = (n) => '$' + Number(n).toLocaleString('en-US');
+const fmtDate = (d) => new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const tierLabel = (t) => ({budget:'Budget',mid:'Mid-range',luxury:'Luxury'}[t]||t);
+const transportLabel = (t) => ({jeep:'4×4 Jeep',motorbike:'Motorbike'}[t]||t);
+const parksById = Object.fromEntries(PARKS.map(p=>[p.id,p]));
+const packagesById = Object.fromEntries(PACKAGES.map(p=>[p.id,p]));
+
+let toastTimer=null;
+function toast(msg, kind='ok'){
+  const root = $('#toast-root'); if(!root) return;
+  root.innerHTML = `<div class="toast panel-hi show" style="border-color:${kind==='ok'?'rgba(124,148,103,.4)':'rgba(193,89,79,.4)'}">
+    <span style="font-size:15px">${kind==='ok'?'✓':'!'}</span>
+    <span style="font-size:13px;color:var(--ink)">${msg}</span></div>`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ const t=$('.toast'); if(t) t.classList.remove('show'); },3000);
+}
+
+/* ---------------- AUTH (mock, in-memory) ---------------- */
+let currentUser = null;
+function login({name,email,role='guest'}){ currentUser={name,email,role}; return currentUser; }
+function loginDemoGuest(){ return login({name:'Sarah Mwangi', email:'sarah@example.com', role:'guest'}); }
+function loginDemoAdmin(){ return login({name:'Admin User', email:'admin@geoadventures.travel', role:'admin'}); }
+function logout(){ currentUser=null; }
+function isGuest(){ return currentUser?.role==='guest'; }
+function isAdmin(){ return currentUser?.role==='admin'; }
+
+/* ---------------- STATE ---------------- */
+const ui = {
+  route:'home',
+  packageFilter:'all',
+  accFilter:'all',
+  adminBookingFilter:'all',
+  bookingMode:'prebuilt',
+  selectedPrebuiltId: PACKAGES[0].id,
+  adminSub:'overview',
+  builder:{ parks:[], days:3, accommodationTier:'mid', transport:'jeep', addOns:[] },
+};
+
+/* ---------------- PRICING ---------------- */
+const PRICING_RULES = { basePricePerParkPerDay:90, accommodationMultiplier:{budget:1,mid:1.6,luxury:2.6}, transportMultiplier:{jeep:1,motorbike:.85} };
+function calcCustomPricePerPerson(b){
+  const accMult = PRICING_RULES.accommodationMultiplier[b.accommodationTier]||1;
+  const transMult = PRICING_RULES.transportMultiplier[b.transport]||1;
+  let total = PRICING_RULES.basePricePerParkPerDay * Math.max(b.parks.length,1) * b.days * accMult * transMult;
+  b.addOns.forEach(id=>{ const a=ADDONS.find(a=>a.id===id); if(a) total+=a.price; });
+  return Math.round(total);
+}
+function validateBooking({name,email,date,group,parks}){
+  const errors=[];
+  if(!name||!name.trim()) errors.push('Full name is required.');
+  if(!email||!/^\S+@\S+\.\S+$/.test(email)) errors.push('A valid email is required.');
+  if(!date) errors.push('Start date is required.');
+  if(!group||group<1) errors.push('Group size must be at least 1.');
+  if(parks && parks.length===0) errors.push('Select at least one park.');
+  return errors;
+}
+
+/* ---------------- COMPONENTS ---------------- */
+function packageCard(p){
+  return `<div class="card panel">
+    <div class="card-img" style="background-image:url('${p.img}')"><span class="tag">${p.duration} days</span></div>
+    <div class="card-body">
+      <div class="card-title">${p.name}</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        ${p.parks.map(id=>`<span class="pill">${(parksById[id]?.name||id).split(' ')[0]}</span>`).join('')}
+        <span class="pill gold">★ ${p.rating}</span>
+      </div>
+      <div class="card-foot">
+        <span class="price">${money(p.price)} <small>/ person</small></span>
+        <button class="btn btn-outline btn-sm" data-nav="booking" data-prefill-package="${p.id}">Book →</button>
+      </div>
+    </div>
+  </div>`;
+}
+function parkCard(p){
+  return `<div class="card panel" data-nav="park-detail" data-id="${p.id}" style="cursor:pointer;">
+    <div class="card-img" style="background-image:url('${p.img}')"></div>
+    <div class="card-body">
+      <div class="card-title">${p.name.replace(' National Park','').replace(' National Reserve','')}</div>
+      <div class="coord">${p.coord}</div>
+    </div>
+  </div>`;
+}
+function accommodationCard(a){
+  return `<div class="card panel">
+    <div class="card-img" style="background-image:url('${a.img}')"><span class="tag">${tierLabel(a.tier)}</span></div>
+    <div class="card-body">
+      <div class="card-title" style="font-size:16px;">${a.name}</div>
+      <div class="coord">${parksById[a.parkId]?.name||''}</div>
+      <div class="card-foot"><span class="price">${money(a.price)} <small>/ night</small></span></div>
+    </div>
+  </div>`;
+}
+function bookingCard(b){
+  const p = packagesById[b.packageId];
+  return `<div class="panel" style="padding:16px 18px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div>
+        <div class="card-title" style="font-size:16px;">${p?.name||'Custom safari'}</div>
+        <div class="coord" style="margin-top:4px;">${fmtDate(b.startDate)} · ${b.groupSize} guests · ${b.id}</div>
+      </div>
+      <span class="status-badge status-${b.status}">${b.status}</span>
+    </div>
+    <div class="card-foot"><span class="price">${money(b.totalPrice)}</span></div>
+  </div>`;
+}
+function statCards(items){
+  return `<div class="stat-cards">${items.map(s=>`
+    <div class="stat-card panel">
+      <div class="num">${s.num}</div>
+      <div class="lbl">${s.lbl}</div>
+      ${s.delta?`<div class="delta">${s.delta}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+function headerNav(route){
+  const links = [['home','Home'],['parks','Parks'],['packages','Packages'],['accommodations','Stays'],['booking','Book']];
+  const top = route.split('/')[0];
+  return `
+  <header class="site">
+    <div class="wrap header-inner">
+      <a class="brand" data-nav="home"><span class="mark">GA</span> Geo Adventures</a>
+      <nav class="main">
+        ${links.map(([r,l])=>`<a href="#" data-nav="${r}" class="${top===r?'active':''}">${l}</a>`).join('')}
+      </nav>
+      <div class="header-actions">
+        ${currentUser ? `
+          <span class="badge-role">${currentUser.role}</span>
+          <button class="btn btn-ghost btn-sm" data-nav="${isAdmin()?'admin':'my-bookings'}">${isAdmin()?'Dashboard':'My bookings'}</button>
+          <button class="btn btn-outline btn-sm" data-action="logout">Log out</button>
+        ` : `
+          <button class="btn btn-outline btn-sm" data-nav="login">Log in</button>
+        `}
+      </div>
+    </div>
+  </header>`;
+}
+function siteFooter(){
+  return `
+  <footer class="site">
+    <div class="wrap footer-panel">
+      <div>
+        <div class="brand" style="margin-bottom:10px;"><span class="mark">GA</span> Geo Adventures</div>
+        <p style="max-width:260px; font-size:13px;">Prototype build — not the production site. Layout &amp; data are illustrative.</p>
+        <div class="channel-links">
+          <a href="${waLink('Hi! I have a question about a safari.')}" target="_blank" title="WhatsApp">💬</a>
+          <a href="mailto:${CONTACT.email}" title="Email">✉️</a>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><h4>Explore</h4><a data-nav="parks">Parks</a><a data-nav="packages">Packages</a><a data-nav="accommodations">Stays</a></div>
+        <div class="footer-col"><h4>Account</h4><a data-nav="login">Log in</a><a data-nav="register">Sign up</a></div>
+        <div class="footer-col"><h4>Contact</h4><div>${CONTACT.email}</div><div>+254 700 000 000</div></div>
+      </div>
+    </div>
+  </footer>`;
+}
+
+/* ---------------- PAGES ---------------- */
+function pageHome(){
+  const featured = PACKAGES.slice(0,3);
+  const featuredPark = PARKS[1];
+  const review = REVIEWS[0];
+  return `
+  <section class="hero wrap">
+    <div class="hero-panel panel">
+      <div class="hero-copy">
+        <div class="eyebrow">Kenya · East Africa</div>
+        <h1 class="h1" style="margin-top:10px;">Safaris built around the ground beneath them.</h1>
+        <p class="lead">${PACKAGES.length} routes across Amboseli, the Maasai Mara, and Tsavo. Pick a fixed itinerary or draw your own from the map.</p>
+        <div class="hero-cta">
+          <button class="btn btn-ochre" data-nav="packages">Browse packages</button>
+          <button class="btn btn-outline" data-nav="booking">Build your own</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">${PACKAGES.length}</div><div class="lbl">Packages</div></div>
+          <div class="hero-stat"><div class="num">${PARKS.length}</div><div class="lbl">Parks</div></div>
+          <div class="hero-stat"><div class="num">4.7</div><div class="lbl">Avg rating</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <svg viewBox="0 0 400 320" preserveAspectRatio="none"><g fill="none" stroke="var(--ochre-soft)" stroke-width="1"><ellipse cx="200" cy="160" rx="60" ry="40"/><ellipse cx="200" cy="160" rx="100" ry="70"/><ellipse cx="200" cy="160" rx="140" ry="100"/><ellipse cx="200" cy="160" rx="180" ry="130"/></g></svg>
+        <div class="float-card panel-hi">
+          <div class="coord">${featuredPark.coord}</div>
+          <div class="h3" style="font-size:16px; margin-top:4px;">${featuredPark.name}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="section-head">
+      <div><div class="eyebrow">Signature routes</div><h2 class="h2" style="margin-top:8px;">Featured packages</h2></div>
+      <button class="btn btn-outline btn-sm" data-nav="packages">View all →</button>
+    </div>
+    <div class="grid grid-3">${featured.map(packageCard).join('')}</div>
+  </section>
+
+  <section class="section wrap" style="padding-top:0;">
+    <div class="section-head">
+      <div><div class="eyebrow">Where you'll go</div><h2 class="h2" style="margin-top:8px;">The four parks</h2></div>
+      <button class="btn btn-outline btn-sm" data-nav="parks">Explore parks →</button>
+    </div>
+    <div class="grid grid-4">${PARKS.map(parkCard).join('')}</div>
+  </section>
+
+  <section class="section wrap" style="padding-top:0;">
+    <div class="panel-hi" style="padding:36px; display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;">
+      <div>
+        <div class="eyebrow">Guest voices</div>
+        <h3 class="h3" style="margin-top:8px; max-width:520px;">${review.comment}</h3>
+        <p style="margin-top:10px; font-size:13px;">— ${review.guestName}, ${parksById[review.parkId].name}</p>
+      </div>
+      <button class="btn btn-ochre" data-nav="booking">Start planning</button>
+    </div>
+  </section>`;
+}
+
+function pageParksList(){
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">Field guide</div>
+    <h1 class="h2" style="margin-top:8px;">National parks &amp; reserves</h1>
+    <p style="margin-top:8px; max-width:560px;">Every itinerary — pre-built or custom — draws from these four landscapes.</p>
+    <div class="grid grid-2" style="margin-top:28px;">
+      ${PARKS.map(p=>`
+      <div class="card panel" data-nav="park-detail" data-id="${p.id}" style="cursor:pointer; flex-direction:row;">
+        <div class="card-img" style="width:180px; height:auto; flex-shrink:0; background-image:url('${p.img}')"></div>
+        <div class="card-body">
+          <div class="card-title">${p.name}</div>
+          <div class="coord">${p.coord}</div>
+          <p style="font-size:13px; margin-top:4px;">${p.description.slice(0,100)}…</p>
+        </div>
+      </div>`).join('')}
+    </div>
+  </section>`;
+}
+
+function pageParkDetail(id){
+  const pk = parksById[id];
+  if(!pk) return `<div class="wrap section"><div class="empty-state">Park not found.</div></div>`;
+  const pkgs = PACKAGES.filter(p=>p.parks.includes(id));
+  const stays = ACCOMMODATIONS.filter(a=>a.parkId===id);
+  const reviews = REVIEWS.filter(r=>r.parkId===id);
+  return `
+  <section class="section wrap">
+    <button class="btn btn-ghost btn-sm" data-nav="parks">← Back to parks</button>
+    <div style="margin-top:18px; border-radius:var(--radius); overflow:hidden; height:280px; background-image:url('${pk.img}'); background-size:cover; background-position:center; position:relative; border:1px solid var(--line);">
+      <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent 30%, rgba(18,20,15,.92));"></div>
+      <div style="position:absolute; bottom:22px; left:28px;">
+        <div class="coord" style="color:#fff; opacity:.8;">${pk.coord}</div>
+        <h1 class="h2" style="margin-top:6px;">${pk.name}</h1>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:26px; margin-top:26px;">
+      <div>
+        <p style="font-size:15px;">${pk.description}</p>
+        <div class="grid grid-2" style="margin-top:20px; gap:12px;">
+          <div class="panel" style="padding:14px;"><div class="eyebrow">Best time</div><div class="h3" style="font-size:17px; margin-top:6px;">${pk.bestTime}</div></div>
+          <div class="panel" style="padding:14px;"><div class="eyebrow">Entrance fee</div><div class="h3" style="font-size:17px; margin-top:6px;">${money(pk.entranceFee)}/day</div></div>
+        </div>
+        <h4 style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); margin-top:24px;">Highlights</h4>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">${pk.highlights.map(h=>`<span class="pill gold">${h}</span>`).join('')}</div>
+        <h4 style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); margin-top:20px;">Wildlife</h4>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">${pk.wildlife.map(h=>`<span class="pill">${h}</span>`).join('')}</div>
+        ${reviews.length?`
+        <h4 style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); margin-top:26px;">Guest reviews</h4>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+          ${reviews.map(r=>`<div class="panel" style="padding:14px 16px;"><div style="font-size:13.5px; color:var(--ink);">"${r.comment}"</div><div style="font-size:11.5px; color:var(--ink-faint); margin-top:6px;">${r.guestName} · ★${r.rating}</div></div>`).join('')}
+        </div>`:''}
+      </div>
+      <div class="panel-hi" style="padding:20px; align-self:start; position:sticky; top:100px;">
+        <div class="h3" style="font-size:16px;">Stay here</div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+          ${stays.slice(0,3).map(a=>`<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px;"><span>${a.name}</span><span class="price" style="font-size:13px;">${money(a.price)}/night</span></div>`).join('')}
+        </div>
+        <button class="btn btn-outline btn-block" style="margin-top:16px;" data-nav="accommodations">All stays →</button>
+        <div class="divider"></div>
+        <div class="h3" style="font-size:16px;">Packages here</div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+          ${pkgs.map(p=>`<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; cursor:pointer;" data-nav="package-detail" data-id="${p.id}"><span>${p.name}</span><span class="price" style="font-size:13px;">${money(p.price)}</span></div>`).join('')||'<div style="font-size:12.5px; color:var(--ink-faint);">None yet — try the custom builder.</div>'}
+        </div>
+        <button class="btn btn-ochre btn-block" style="margin-top:16px;" data-nav="booking">Build a safari here</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function pagePackagesList(activeFilter){
+  const list = activeFilter==='all' ? PACKAGES : PACKAGES.filter(p=>p.parks.includes(activeFilter));
+  const filterIds = ['all', ...PARKS.map(p=>p.id)];
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">All routes</div>
+    <h1 class="h2" style="margin-top:8px;">Pre-built safari packages</h1>
+    <p style="margin-top:8px; max-width:560px;">Fixed itineraries with set pricing. Prefer to choose your own parks, nights, and add-ons? <a class="link-underline" data-nav="booking">Use the custom builder</a>.</p>
+    <div class="filter-bar panel" style="margin-top:22px;">
+      ${filterIds.map(f=>`<div class="chip ${activeFilter===f?'active':''}" data-filter-package="${f}">${f==='all'?'All parks':parksById[f].name.split(' ')[0]}</div>`).join('')}
+    </div>
+    <div class="grid grid-3">${list.map(packageCard).join('') || `<div class="empty-state">No packages match this filter.</div>`}</div>
+  </section>`;
+}
+
+function pagePackageDetail(id){
+  const p = packagesById[id];
+  if(!p) return `<div class="wrap section"><div class="empty-state">Package not found.</div></div>`;
+  return `
+  <section class="section wrap">
+    <button class="btn btn-ghost btn-sm" data-nav="packages">← Back to packages</button>
+    <div class="panel" style="margin-top:18px; overflow:hidden;">
+      <div style="height:260px; background-image:url('${p.img}'); background-size:cover; background-position:center; position:relative;">
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, rgba(18,20,15,.88));"></div>
+        <div style="position:absolute; bottom:22px; left:28px;">
+          <div style="display:flex; gap:8px; margin-bottom:10px;">${p.parks.map(id=>`<span class="pill" style="background:var(--panel-hi);">${parksById[id].name}</span>`).join('')}</div>
+          <h1 class="h2">${p.name}</h1>
+        </div>
+      </div>
+      <div style="padding:28px; display:grid; grid-template-columns:1.6fr 1fr; gap:28px;">
+        <div>
+          <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+            <span class="pill gold">${p.duration} days</span>
+            <span class="pill">${tierLabel(p.accommodationTier)}</span>
+            <span class="pill ${p.transport==='jeep'?'green':'clay'}">${transportLabel(p.transport)}</span>
+            <span class="pill">★ ${p.rating}</span>
+          </div>
+          <h3 class="h3">Itinerary</h3>
+          <div class="divider"></div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            ${p.itinerary.map((d,i)=>`<div style="display:flex; gap:14px;"><div style="font-family:var(--font-mono); color:var(--ochre-soft); font-size:13px; width:24px;">${String(i+1).padStart(2,'0')}</div><div style="font-size:14px; color:var(--ink-dim);">${d}</div></div>`).join('')}
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:26px;">
+            <div><h4 style="font-family:var(--font-mono); font-size:12px; color:var(--ok); text-transform:uppercase; letter-spacing:.5px;">Included</h4><ul style="margin:10px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13.5px; line-height:1.9;">${p.included.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+            <div><h4 style="font-family:var(--font-mono); font-size:12px; color:#e6a89f; text-transform:uppercase; letter-spacing:.5px;">Not included</h4><ul style="margin:10px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13.5px; line-height:1.9;">${p.notIncluded.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+          </div>
+        </div>
+        <div class="panel-hi" style="padding:22px; align-self:start; position:sticky; top:100px;">
+          <div class="price" style="font-size:24px;">${money(p.price)} <small>/ person</small></div>
+          <p style="font-size:12.5px; margin-top:6px;">Group discounts available on request.</p>
+          <button class="btn btn-ochre btn-block" style="margin-top:16px;" data-nav="booking" data-prefill-package="${p.id}">Book this package</button>
+          <a class="btn btn-outline btn-block" style="margin-top:10px;" href="${waLink('Hi! I have a question about the '+p.name+' package.')}" target="_blank">Ask on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function pageAccommodations(activeTier){
+  const TIERS=['all','budget','mid','luxury'];
+  const LABELS={all:'All tiers',budget:'Budget',mid:'Mid-range',luxury:'Luxury'};
+  const list = activeTier==='all' ? ACCOMMODATIONS : ACCOMMODATIONS.filter(a=>a.tier===activeTier);
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">Lodges &amp; camps</div>
+    <h1 class="h2" style="margin-top:8px;">Accommodations</h1>
+    <p style="margin-top:8px;">Every stay is available inside packages or as part of a custom itinerary.</p>
+    <div class="filter-bar panel" style="margin-top:22px;">
+      ${TIERS.map(t=>`<div class="chip ${activeTier===t?'active':''}" data-filter-acc="${t}">${LABELS[t]}</div>`).join('')}
+    </div>
+    <div class="grid grid-4">${list.map(accommodationCard).join('') || `<div class="empty-state">No accommodations at this tier.</div>`}</div>
+  </section>`;
+}
+
+function pageLogin(){
+  return `
+  <section class="section wrap" style="max-width:420px; margin:0 auto;">
+    <div class="panel" style="padding:30px;">
+      <div class="eyebrow">Welcome back</div>
+      <h1 class="h2" style="margin-top:8px;">Log in</h1>
+      <div class="demo-note">Prototype shortcut — skip the form and jump straight into either dashboard:</div>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button class="btn btn-outline" style="flex:1;" data-quick-login="guest">Demo guest</button>
+        <button class="btn btn-outline" style="flex:1;" data-quick-login="admin">Demo admin</button>
+      </div>
+      <div class="divider"></div>
+      <div class="field" style="margin-top:16px;"><label>Email</label><input type="email" id="login-email" placeholder="jane@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <button class="btn btn-ochre btn-block" id="login-submit">Log in</button>
+      <p class="center-note">No account? <a class="link-underline" data-nav="register">Sign up</a></p>
+    </div>
+  </section>`;
+}
+
+function pageRegister(){
+  return `
+  <section class="section wrap" style="max-width:420px; margin:0 auto;">
+    <div class="panel" style="padding:30px;">
+      <div class="eyebrow">New here</div>
+      <h1 class="h2" style="margin-top:8px;">Create your account</h1>
+      <div class="field" style="margin-top:16px;"><label>Full name</label><input type="text" id="reg-name" placeholder="Jane Wanjiru"></div>
+      <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="jane@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="reg-password" placeholder="••••••••"></div>
+      <button class="btn btn-ochre btn-block" id="register-submit">Create account</button>
+      <p class="center-note">Already registered? <a class="link-underline" data-nav="login">Log in</a></p>
+    </div>
+  </section>`;
+}
+
+function pageMyBookings(){
+  const user = currentUser;
+  let mine = BOOKINGS.filter(b=>b.guestEmail===user.email);
+  if(!mine.length) mine = BOOKINGS.filter(b=>b.guestEmail==='sarah@example.com');
+  const upcoming = mine.filter(b=>new Date(b.startDate)>=new Date(TODAY) && b.status!=='cancelled');
+  const past = mine.filter(b=>new Date(b.startDate)<new Date(TODAY) || b.status==='cancelled');
+  const stats = statCards([
+    {num:mine.length, lbl:'Total bookings'},
+    {num:upcoming.length, lbl:'Upcoming trips'},
+    {num:mine.filter(b=>b.status==='confirmed').length, lbl:'Confirmed'},
+    {num:money(mine.reduce((s,b)=>s+b.totalPrice,0)), lbl:'Lifetime spend'},
+  ]);
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">Guest dashboard</div>
+    <h1 class="h2" style="margin-top:8px;">My bookings</h1>
+    ${stats}
+    <h3 class="h3" style="margin-top:8px;">Upcoming</h3>
+    <div class="grid grid-2" style="margin-top:14px;">
+      ${upcoming.map(bookingCard).join('') || `<div class="empty-state">No upcoming trips yet. <a class="link-underline" data-nav="booking">Plan one →</a></div>`}
+    </div>
+    ${past.length?`
+    <h3 class="h3" style="margin-top:30px;">Past &amp; cancelled</h3>
+    <div class="grid grid-2" style="margin-top:14px;">${past.map(bookingCard).join('')}</div>`:''}
+  </section>`;
+}
+
+function pageBooking(){
+  const toggle = `
+  <div class="toggle-group" style="margin-top:20px; width:fit-content;">
+    <button class="${ui.bookingMode==='prebuilt'?'active':''}" data-booking-mode="prebuilt">Pre-built package</button>
+    <button class="${ui.bookingMode==='custom'?'active':''}" data-booking-mode="custom">Build your own</button>
+  </div>`;
+  const body = ui.bookingMode==='custom' ? bookingCustomBody() : bookingPrebuiltBody();
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">Book your safari</div>
+    <h1 class="h2" style="margin-top:8px;">Choose how you want to travel</h1>
+    ${toggle}
+    <div style="margin-top:28px;">${body}</div>
+  </section>`;
+}
+
+function bookingPrebuiltBody(){
+  const id = ui.selectedPrebuiltId || PACKAGES[0].id;
+  const group = parseInt($('#pb-group')?.value || 2, 10);
+  return `
+  <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:26px; align-items:start;">
+    <div class="panel" style="padding:22px;">
+      <div class="field"><label>Package</label>
+        <select id="pb-package">${PACKAGES.map(p=>`<option value="${p.id}" ${p.id===id?'selected':''}>${p.name} — ${money(p.price)}/person</option>`).join('')}</select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Full name</label><input id="pb-name" placeholder="Jane Wanjiru"></div>
+        <div class="field"><label>Email</label><input id="pb-email" type="email" placeholder="jane@example.com"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Start date</label><input id="pb-date" type="date" min="2026-08-18"></div>
+        <div class="field"><label>Group size</label><input id="pb-group" type="number" min="1" value="2"></div>
+      </div>
+      <button class="btn btn-ochre btn-block" id="pb-submit">Submit booking request</button>
+    </div>
+    <div id="pb-summary">${prebuiltSummary(id, group)}</div>
+  </div>`;
+}
+function prebuiltSummary(packageId, group){
+  const p = packagesById[packageId] || PACKAGES[0];
+  const total = p.price * group;
+  return `<div class="panel-hi" style="padding:20px;">
+    <div class="h3" style="font-size:16px;">${p.name}</div>
+    <div class="coord" style="margin-top:6px;">${p.duration} days · ${p.parks.map(id=>parksById[id].name).join(', ')}</div>
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:8px;"><span>Price per person</span><span>${money(p.price)}</span></div>
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:8px;"><span>Group size</span><span>${group}</span></div>
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center;"><span class="h3" style="font-size:15px;">Estimated total</span><span class="price" style="font-size:20px;">${money(total)}</span></div>
+  </div>`;
+}
+function bookingCustomBody(){
+  const b = ui.builder;
+  return `
+  <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:26px; align-items:start;">
+    <div class="panel" style="padding:22px;">
+      <div class="field"><label>Parks</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${PARKS.map(p=>`
+          <label class="checkbox-card ${b.parks.includes(p.id)?'checked':''}">
+            <input type="checkbox" data-custom-park="${p.id}" ${b.parks.includes(p.id)?'checked':''}>
+            <span>${p.name}</span>
+          </label>`).join('')}
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Days</label><input id="cb-days" type="number" min="1" value="${b.days}"></div>
+        <div class="field"><label>Accommodation</label>
+          <select id="cb-tier">${['budget','mid','luxury'].map(t=>`<option value="${t}" ${b.accommodationTier===t?'selected':''}>${tierLabel(t)}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="field"><label>Transport</label>
+        <select id="cb-transport">${['jeep','motorbike'].map(t=>`<option value="${t}" ${b.transport===t?'selected':''}>${transportLabel(t)}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Add-ons</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${ADDONS.map(a=>`
+          <label class="checkbox-card ${b.addOns.includes(a.id)?'checked':''}">
+            <input type="checkbox" data-custom-addon="${a.id}" ${b.addOns.includes(a.id)?'checked':''}>
+            <span style="flex:1;">${a.name}</span><span class="price" style="font-size:13px;">+${money(a.price)}</span>
+          </label>`).join('')}
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Full name</label><input id="cb-name" placeholder="Jane Wanjiru"></div>
+        <div class="field"><label>Email</label><input id="cb-email" type="email" placeholder="jane@example.com"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Start date</label><input id="cb-date" type="date" min="2026-08-18"></div>
+        <div class="field"><label>Group size</label><input id="cb-group" type="number" min="1" value="2"></div>
+      </div>
+      <button class="btn btn-ochre btn-block" id="cb-submit">Submit custom request</button>
+    </div>
+    <div id="cb-summary">${customSummary(b)}</div>
+  </div>`;
+}
+function customSummary(b){
+  const total = calcCustomPricePerPerson(b);
+  return `<div class="panel-hi" style="padding:20px;">
+    <div class="h3" style="font-size:16px;">Your custom safari</div>
+    <div class="coord" style="margin-top:6px;">${b.parks.length ? b.parks.map(id=>parksById[id].name.split(' ')[0]).join(', ') : 'No parks selected'}</div>
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:8px;"><span>Days</span><span>${b.days}</span></div>
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:8px;"><span>Accommodation</span><span>${tierLabel(b.accommodationTier)}</span></div>
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:8px;"><span>Transport</span><span>${transportLabel(b.transport)}</span></div>
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center;"><span class="h3" style="font-size:15px;">Est. per person</span><span class="price" style="font-size:20px;">${money(total)}</span></div>
+  </div>`;
+}
+
+/* ---------------- ADMIN ---------------- */
+function adminShell(sub, content){
+  const links = [['overview','Overview'],['bookings','Bookings'],['packages','Packages'],['accommodations','Accommodations'],['settings','Settings']];
+  return `
+  <section class="section wrap">
+    <div class="eyebrow">Admin</div>
+    <h1 class="h2" style="margin-top:8px; margin-bottom:24px;">Dashboard</h1>
+    <div class="dash-layout">
+      <div class="dash-sidebar panel">
+        ${links.map(([r,l])=>`<a href="#" data-nav="admin" data-admin-sub="${r}" class="${sub===r?'active':''}">${l}</a>`).join('')}
+      </div>
+      <div>${content}</div>
+    </div>
+  </section>`;
+}
+function adminOverview(){
+  const bookings = BOOKINGS;
+  const total = bookings.length;
+  const revenue = bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+b.totalPrice,0);
+  const pending = bookings.filter(b=>b.status==='pending').length;
+  const upcoming = bookings.filter(b=>new Date(b.startDate)>=new Date(TODAY) && b.status!=='cancelled').length;
+  const recent = [...bookings].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
+  const stats = statCards([
+    {num:total, lbl:'Total bookings', delta:'+3 this week'},
+    {num:money(revenue), lbl:'Gross revenue', delta:'+12% vs last month'},
+    {num:pending, lbl:'Awaiting confirmation'},
+    {num:upcoming, lbl:'Upcoming departures'},
+  ]);
+  return `${stats}
+  <div class="panel" style="padding:22px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div class="h3" style="font-size:17px;">Recent bookings</div>
+      <button class="btn btn-outline btn-sm" data-nav="admin" data-admin-sub="bookings">View all →</button>
+    </div>
+    ${bookingsTable(recent)}
+  </div>`;
+}
+function bookingsTable(list){
+  return `<table><thead><tr><th>ID</th><th>Package</th><th>Guest</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
+  <tbody>${list.map(b=>`<tr><td>${b.id}</td><td>${packagesById[b.packageId]?.name||'Custom'}</td><td>${b.guestEmail}</td><td>${fmtDate(b.startDate)}</td><td>${money(b.totalPrice)}</td><td><span class="status-badge status-${b.status}">${b.status}</span></td></tr>`).join('')}</tbody></table>`;
+}
+function adminBookings(filter){
+  const FILTERS=['all','pending','confirmed','cancelled'];
+  const list = filter==='all' ? BOOKINGS : BOOKINGS.filter(b=>b.status===filter);
+  return `
+  <div class="filter-bar panel">
+    ${FILTERS.map(f=>`<div class="chip ${filter===f?'active':''}" data-filter-admin-booking="${f}">${f[0].toUpperCase()+f.slice(1)}</div>`).join('')}
+  </div>
+  <div class="panel" style="padding:22px; margin-top:18px;">
+    <table><thead><tr><th>ID</th><th>Package</th><th>Guest</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>${list.map(b=>`<tr><td>${b.id}</td><td>${packagesById[b.packageId]?.name||'Custom'}</td><td>${b.guestEmail}</td><td>${fmtDate(b.startDate)}</td><td>${money(b.totalPrice)}</td><td>
+      <select data-admin-status="${b.id}" style="background:var(--bg); color:var(--ink); border:1px solid var(--line-hi); border-radius:var(--radius); padding:4px 6px; font-size:12px;">
+        ${['pending','confirmed','cancelled'].map(s=>`<option value="${s}" ${b.status===s?'selected':''}>${s}</option>`).join('')}
+      </select></td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center; color:var(--ink-faint);">No bookings in this filter.</td></tr>`}</tbody></table>
+  </div>`;
+}
+function adminPackages(){
+  return `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="h3" style="font-size:17px;">Packages</div>
+    <button class="btn btn-ochre btn-sm" data-action="admin-new-package">+ New package</button>
+  </div>
+  <div class="grid grid-3">${PACKAGES.map(p=>`
+    <div class="card panel">
+      <div class="card-img" style="background-image:url('${p.img}')"></div>
+      <div class="card-body">
+        <div class="card-title" style="font-size:16px;">${p.name}</div>
+        <div class="card-foot"><span class="price">${money(p.price)}</span><button class="btn btn-ghost btn-sm" data-action="admin-edit-package">Edit</button></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+function adminAccommodations(){
+  return `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="h3" style="font-size:17px;">Accommodations</div>
+    <button class="btn btn-ochre btn-sm" data-action="admin-new-acc">+ New accommodation</button>
+  </div>
+  <div class="panel" style="padding:22px;">
+    <table><thead><tr><th>Name</th><th>Park</th><th>Tier</th><th>Price/night</th><th></th></tr></thead>
+    <tbody>${ACCOMMODATIONS.map(a=>`<tr><td>${a.name}</td><td>${parksById[a.parkId].name}</td><td>${tierLabel(a.tier)}</td><td>${money(a.price)}</td><td><button class="btn btn-ghost btn-sm" data-action="admin-edit-acc">Edit</button></td></tr>`).join('')}</tbody></table>
+  </div>`;
+}
+function adminSettings(){
+  return `<div class="panel" style="padding:24px; max-width:520px;">
+    <div class="field"><label>Company name</label><input value="Geo Adventures"></div>
+    <div class="field"><label>Contact email</label><input value="${CONTACT.email}"></div>
+    <div class="field"><label>WhatsApp number</label><input value="+${CONTACT.whatsappNumber}"></div>
+    <div class="field"><label>Currency</label><select><option>USD</option><option>KES</option></select></div>
+    <button class="btn btn-ochre" data-action="admin-save-settings">Save changes</button>
+  </div>`;
+}
+function pageAdmin(){
+  const sub = ui.adminSub;
+  let content;
+  if(sub==='bookings') content = adminBookings(ui.adminBookingFilter);
+  else if(sub==='packages') content = adminPackages();
+  else if(sub==='accommodations') content = adminAccommodations();
+  else if(sub==='settings') content = adminSettings();
+  else content = adminOverview();
+  return adminShell(sub, content);
+}
+
+/* ---------------- ROUTER / RENDER ---------------- */
+function guardedRoute(route){
+  if(route==='my-bookings' && !isGuest()) return 'login';
+  if(route==='admin' && !isAdmin()) return 'login';
+  return route;
+}
+function render(){
+  const route = guardedRoute(ui.route);
+  ui.route = route;
+  const app = $('#app');
+  let body='';
+  if(route==='home') body = pageHome();
+  else if(route==='parks') body = pageParksList();
+  else if(route==='park-detail') body = pageParkDetail(ui.selectedParkId);
+  else if(route==='packages') body = pagePackagesList(ui.packageFilter);
+  else if(route==='package-detail') body = pagePackageDetail(ui.selectedPackageDetailId);
+  else if(route==='accommodations') body = pageAccommodations(ui.accFilter);
+  else if(route==='booking') body = pageBooking();
+  else if(route==='login') body = pageLogin();
+  else if(route==='register') body = pageRegister();
+  else if(route==='my-bookings') body = pageMyBookings();
+  else if(route==='admin') body = pageAdmin();
+  else body = pageHome();
+
+  app.innerHTML = headerNav(route) + `<main>${body}</main>` + siteFooter();
+  window.scrollTo(0,0);
+}
+
+/* ---------------- EVENTS (delegated) ---------------- */
+document.addEventListener('click', async (e)=>{
+  const navEl = e.target.closest('[data-nav]');
+  if(navEl){
+    e.preventDefault();
+    const r = navEl.getAttribute('data-nav');
+    const id = navEl.getAttribute('data-id');
+    const prefill = navEl.getAttribute('data-prefill-package');
+    const adminSub = navEl.getAttribute('data-admin-sub');
+    if(r==='package-detail'){ ui.selectedPackageDetailId=id; ui.route='package-detail'; }
+    else if(r==='park-detail'){ ui.selectedParkId=id; ui.route='park-detail'; }
+    else if(r==='booking' && prefill){ ui.bookingMode='prebuilt'; ui.selectedPrebuiltId=prefill; ui.route='booking'; }
+    else if(r==='admin'){ ui.route='admin'; if(adminSub) ui.adminSub=adminSub; }
+    else ui.route = r;
+    render();
+    return;
+  }
+  const fp = e.target.closest('[data-filter-package]');
+  if(fp){ ui.packageFilter = fp.getAttribute('data-filter-package'); render(); return; }
+  const fa = e.target.closest('[data-filter-acc]');
+  if(fa){ ui.accFilter = fa.getAttribute('data-filter-acc'); render(); return; }
+  const fab = e.target.closest('[data-filter-admin-booking]');
+  if(fab){ ui.adminBookingFilter = fab.getAttribute('data-filter-admin-booking'); render(); return; }
+  const bmode = e.target.closest('[data-booking-mode]');
+  if(bmode){ ui.bookingMode = bmode.getAttribute('data-booking-mode'); render(); return; }
+  const ql = e.target.closest('[data-quick-login]');
+  if(ql){
+    const role = ql.getAttribute('data-quick-login');
+    const user = role==='admin' ? loginDemoAdmin() : loginDemoGuest();
+    toast(`Logged in as ${user.name} (${role})`);
+    ui.route = role==='admin' ? 'admin' : 'my-bookings';
+    render();
+    return;
+  }
+  if(e.target.id==='login-submit'){
+    const email = $('#login-email').value.trim();
+    if(!email){ toast('Enter your email to continue','err'); return; }
+    const name = email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    login({name,email,role:'guest'});
+    toast('Logged in successfully');
+    ui.route='my-bookings'; render(); return;
+  }
+  if(e.target.id==='register-submit'){
+    const name = $('#reg-name').value.trim();
+    const email = $('#reg-email').value.trim();
+    if(!name||!email){ toast('Fill in your name and email','err'); return; }
+    login({name,email,role:'guest'});
+    toast('Account created — welcome!');
+    ui.route='my-bookings'; render(); return;
+  }
+  if(e.target.getAttribute('data-action')==='logout'){
+    logout(); toast('Logged out'); ui.route='home'; render(); return;
+  }
+  if(e.target.id==='pb-submit'){
+    const p = packagesById[$('#pb-package').value];
+    const name = $('#pb-name').value.trim();
+    const email = $('#pb-email').value.trim();
+    const group = parseInt($('#pb-group').value||1,10);
+    const date = $('#pb-date').value;
+    const errors = validateBooking({name,email,date,group});
+    if(errors.length){ toast(errors[0],'err'); return; }
+    const total = p.price*group;
+    const id = 'BK-'+(1040+BOOKINGS.length+1);
+    const booking = {id, guestEmail:email, packageId:p.id, groupSize:group, startDate:date, status:'pending', totalPrice:total, createdAt:TODAY};
+    BOOKINGS.push(booking);
+    toast('Booking request submitted — redirecting to WhatsApp');
+    setTimeout(()=>{ window.open(waLink(`Hi! I'd like to book "${p.name}" for ${group} guests starting ${date}. Booking ref ${booking.id}. Total est. $${total.toLocaleString()}.`),'_blank'); },400);
+    if(!currentUser) login({name,email,role:'guest'});
+    ui.route='my-bookings'; render(); return;
+  }
+  if(e.target.id==='cb-submit'){
+    const b = ui.builder;
+    const name = $('#cb-name').value.trim();
+    const email = $('#cb-email').value.trim();
+    const group = parseInt($('#cb-group').value||1,10);
+    const date = $('#cb-date').value;
+    const errors = validateBooking({name,email,date,group,parks:b.parks});
+    if(errors.length){ toast(errors[0],'err'); return; }
+    const perPerson = calcCustomPricePerPerson(b);
+    const id = 'BK-'+(1040+BOOKINGS.length+1);
+    const booking = {id, guestEmail:email, packageId:null, groupSize:group, startDate:date, status:'pending', totalPrice:perPerson*group, createdAt:TODAY};
+    BOOKINGS.push(booking);
+    toast('Custom booking submitted — redirecting to WhatsApp');
+    const parkNames = b.parks.map(id=>parksById[id].name).join(', ');
+    setTimeout(()=>{ window.open(waLink(`Hi! I'd like a custom safari: ${parkNames}, ${b.days} days, ${b.accommodationTier} stay, ${b.transport}. Booking ref ${booking.id}.`),'_blank'); },400);
+    if(!currentUser) login({name,email,role:'guest'});
+    ui.route='my-bookings'; render(); return;
+  }
+  if(['admin-new-package','admin-edit-package'].includes(e.target.getAttribute('data-action'))){ toast('Package editor is a prototype stub'); return; }
+  if(['admin-new-acc','admin-edit-acc'].includes(e.target.getAttribute('data-action'))){ toast('Accommodation editor is a prototype stub'); return; }
+  if(e.target.getAttribute('data-action')==='admin-save-settings'){ toast('Settings saved'); return; }
+});
+
+document.addEventListener('change', async (e)=>{
+  if(e.target.id==='pb-package' || e.target.id==='pb-group'){
+    const packageId = $('#pb-package').value;
+    const group = parseInt($('#pb-group').value||1,10);
+    ui.selectedPrebuiltId = packageId;
+    const box = $('#pb-summary'); if(box) box.innerHTML = prebuiltSummary(packageId, group);
+    return;
+  }
+  if(e.target.matches('[data-custom-park]')){
+    const id = e.target.getAttribute('data-custom-park');
+    if(e.target.checked) ui.builder.parks.push(id); else ui.builder.parks = ui.builder.parks.filter(p=>p!==id);
+    render(); return;
+  }
+  if(e.target.matches('[data-custom-addon]')){
+    const id = e.target.getAttribute('data-custom-addon');
+    if(e.target.checked) ui.builder.addOns.push(id); else ui.builder.addOns = ui.builder.addOns.filter(a=>a!==id);
+    e.target.closest('.checkbox-card')?.classList.toggle('checked', e.target.checked);
+    const box = $('#cb-summary'); if(box) box.innerHTML = customSummary(ui.builder);
+    return;
+  }
+  if(e.target.id==='cb-days'){ ui.builder.days = parseInt(e.target.value||1,10); refreshCb(); return; }
+  if(e.target.id==='cb-tier'){ ui.builder.accommodationTier = e.target.value; refreshCb(); return; }
+  if(e.target.id==='cb-transport'){ ui.builder.transport = e.target.value; refreshCb(); return; }
+  if(e.target.matches('[data-admin-status]')){
+    const id = e.target.getAttribute('data-admin-status');
+    const b = BOOKINGS.find(b=>b.id===id);
+    if(b) b.status = e.target.value;
+    toast(`Booking ${id} marked ${e.target.value}`);
+    render(); return;
+  }
+});
+function refreshCb(){ const box = $('#cb-summary'); if(box) box.innerHTML = customSummary(ui.builder); }
+
+/* ---------------- BOOT ---------------- */
+render();
+</script>
+</body>
+</html>
