@@ -1,46 +1,58 @@
-/* ==========================================================
-   ROUTER — hash parsing + change subscription.
-   URL shape: #/<route>/<id>?key=value&key2=value2
-   Both <id> and the query string are optional. app.js is the
-   only module that decides what a route means; this file just
-   turns the hash into { route, id, query } and back again.
-   ========================================================== */
+// Minimal hash router: #/route/:param?key=value
+const listeners = new Set();
+let routes = [];
 
-export function parseHash(hash = window.location.hash){
-  const raw = hash.replace(/^#\/?/, '');
-  const [pathPart, queryPart=''] = raw.split('?');
-  const [route='home', id=null] = pathPart.split('/').filter(Boolean).length
-    ? pathPart.split('/').filter(Boolean)
-    : ['home'];
-  const query = Object.fromEntries(new URLSearchParams(queryPart));
-  return { route, id, query };
+function toRegex(pattern){
+  const paramNames = [];
+  const regexStr = pattern
+    .replace(/\/:([^/]+)/g, (_, name) => { paramNames.push(name); return '/([^/?]+)'; })
+    .replace(/\//g, '\\/');
+  return { regex: new RegExp(`^${regexStr}$`), paramNames };
 }
 
-export function buildHash(route, { id, query } = {}){
-  let hash = `#/${route}`;
-  if(id) hash += `/${id}`;
-  const qs = new URLSearchParams(query || {}).toString();
-  if(qs) hash += `?${qs}`;
-  return hash;
+export function defineRoutes(routeTable){
+  routes = routeTable.map((r) => ({ ...r, ...toRegex(r.path) }));
 }
 
-export function navigate(route, opts = {}){
-  const next = buildHash(route, opts);
-  if(window.location.hash === next){
-    // same hash won't fire hashchange — notify listeners manually
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  } else {
-    window.location.hash = next;
+export function parseHash(){
+  const raw = window.location.hash.slice(1) || '/';
+  const [pathPart, queryPart] = raw.split('?');
+  const path = pathPart || '/';
+  const query = {};
+  if (queryPart){
+    new URLSearchParams(queryPart).forEach((v, k) => { query[k] = v; });
   }
+  return { path, query };
 }
 
-export function getRoute(){
-  return parseHash();
+export function matchRoute(path){
+  for (const route of routes){
+    const m = path.match(route.regex);
+    if (m){
+      const params = {};
+      route.paramNames.forEach((name, i) => { params[name] = decodeURIComponent(m[i + 1]); });
+      return { route, params };
+    }
+  }
+  return null;
 }
 
-export function subscribe(callback){
-  const handler = () => callback(getRoute());
-  window.addEventListener('hashchange', handler);
-  callback(getRoute()); // fire once for the initial load
-  return () => window.removeEventListener('hashchange', handler);
+export function onRouteChange(fn){
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+export function startRouter(){
+  const handle = () => {
+    const { path, query } = parseHash();
+    const matched = matchRoute(path);
+    listeners.forEach((fn) => fn({ path, query, matched }));
+  };
+  window.addEventListener('hashchange', handle);
+  window.addEventListener('DOMContentLoaded', handle);
+  if (document.readyState !== 'loading') handle();
+}
+
+export function navigate(hashPath){
+  window.location.hash = hashPath;
 }

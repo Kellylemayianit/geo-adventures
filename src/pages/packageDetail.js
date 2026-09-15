@@ -1,48 +1,120 @@
-import { packagesById, parksById, money } from '../services/dataLoader.js';
-import { tierLabel, transportLabel } from '../utilities/helpers.js';
-import { waLink } from '../utilities/channelLinks.js';
-import { contact } from '../services/dataLoader.js';
+import { render, qs, formatMoney } from '../utilities/helpers.js';
+import { renderPageBanner } from '../components/hero.js';
+import { icon } from '../utilities/icons.js';
+import { renderBookingPanel, wireBookingForm } from '../components/bookingForm.js';
+import { computePackagePrice } from '../utilities/booking.js';
+import { getPackage, getDestinations, getStayTiers, getTransportOptions } from '../services/dataLoader.js';
 
-export function pagePackageDetail(id){
-  const p = packagesById()[id];
-  if(!p) return `<div class="wrap section"><div class="empty-state">Package not found.</div></div>`;
-  const byId = parksById();
-  return `
-  <section class="section wrap">
-    <button class="btn btn-ghost btn-sm" data-nav="packages">← Back to packages</button>
-    <div class="panel" style="margin-top:18px; overflow:hidden;">
-      <div style="height:260px; background-image:url('${p.img}'); background-size:cover; background-position:center; position:relative;">
-        <div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, rgba(18,20,15,.88));"></div>
-        <div style="position:absolute; bottom:22px; left:28px;">
-          <div style="display:flex; gap:8px; margin-bottom:10px;">${p.parks.map(id=>`<span class="pill" style="background:var(--panel-hi);">${byId[id]?.name||id}</span>`).join('')}</div>
-          <h1 class="h2">${p.name}</h1>
-        </div>
-      </div>
-      <div style="padding:28px; display:grid; grid-template-columns:1.6fr 1fr; gap:28px;">
+export async function mount(container, { params }){
+  const pkg = await getPackage(params.slug);
+  if (!pkg){
+    render(container, `<div class="section container text-center"><h2>Package not found</h2><a class="btn btn-primary" href="#/packages">Back to packages</a></div>`);
+    return;
+  }
+  const [allDest, allStays, allTransport] = await Promise.all([getDestinations(), getStayTiers(), getTransportOptions()]);
+  const destNames = pkg.destinationIds.map((id) => allDest.find((d) => d.id === id)?.name).filter(Boolean);
+  const stay = allStays.find((s) => s.id === pkg.stayTier);
+  const transport = allTransport.find((t) => t.id === pkg.transportId);
+
+  let travelers = 2;
+
+  function panelHtml(){
+    const total = computePackagePrice(pkg, travelers);
+    return renderBookingPanel({
+      title: pkg.title,
+      total,
+      lines: [
+        { label: 'Price per person', value: formatMoney(pkg.pricePerPersonKes) },
+        { label: 'Travellers', value: `<span id="pd-qty-display">${travelers}</span>` },
+      ],
+      ctaLabel: 'Request to Book This Package',
+    });
+  }
+
+  render(container, `
+    ${renderPageBanner({ image: pkg.image, title: pkg.title, crumbs: [{ label: 'Home', href: '#/' }, { label: 'Packages', href: '#/packages' }, { label: pkg.title }] })}
+    <section class="section">
+      <div class="container builder">
         <div>
-          <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
-            <span class="pill gold">${p.duration} days</span>
-            <span class="pill">${tierLabel(p.accommodationTier)}</span>
-            <span class="pill ${p.transport==='jeep'?'green':'clay'}">${transportLabel(p.transport)}</span>
-            <span class="pill">★ ${p.rating}</span>
+          <div class="flex gap-sm" style="margin-bottom:1rem">
+            <span class="pill pill-amber">${pkg.classLabel}</span>
+            <span class="pill">${icon('clock')} ${pkg.days} day${pkg.days > 1 ? 's' : ''}</span>
+            <span class="pill">${icon('bed')} ${stay?.label || ''}</span>
+            <span class="pill">${icon('car')} ${transport?.label || ''}</span>
           </div>
-          <h3 class="h3">Itinerary</h3>
-          <div class="divider"></div>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            ${p.itinerary.map((d,i)=>`<div style="display:flex; gap:14px;"><div style="font-family:var(--font-mono); color:var(--ochre-soft); font-size:13px; width:24px;">${String(i+1).padStart(2,'0')}</div><div style="font-size:14px; color:var(--ink-dim);">${d}</div></div>`).join('')}
+          <h2>Overview</h2>
+          <p>${pkg.summary}</p>
+          <p class="muted">Covers: ${destNames.join(', ')}</p>
+
+          <h3>What's included</h3>
+          <div class="grid grid-2" style="margin-bottom:2rem">
+            ${pkg.highlights.map((h) => `<div class="flex gap-sm"><span style="color:var(--green-600)">${icon('check')}</span><span>${h}</span></div>`).join('')}
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:26px;">
-            <div><h4 style="font-family:var(--font-mono); font-size:12px; color:var(--ok); text-transform:uppercase; letter-spacing:.5px;">Included</h4><ul style="margin:10px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13.5px; line-height:1.9;">${p.included.map(i=>`<li>${i}</li>`).join('')}</ul></div>
-            <div><h4 style="font-family:var(--font-mono); font-size:12px; color:#e6a89f; text-transform:uppercase; letter-spacing:.5px;">Not included</h4><ul style="margin:10px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13.5px; line-height:1.9;">${p.notIncluded.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+
+          <h3>Day-by-day itinerary</h3>
+          <div>
+            ${pkg.itinerary.map((it) => `
+              <div class="builder-step">
+                <h4><span class="step-no">${it.day}</span> ${it.title}</h4>
+                <p class="muted" style="margin-top:.6rem">${it.text}</p>
+              </div>
+            `).join('')}
           </div>
         </div>
-        <div class="panel-hi" style="padding:22px; align-self:start; position:sticky; top:100px;">
-          <div class="price" style="font-size:24px;">${money(p.price)} <small>/ person</small></div>
-          <p style="font-size:12.5px; margin-top:6px;">Group discounts available on request.</p>
-          <button class="btn btn-ochre btn-block" style="margin-top:16px;" data-nav="booking" data-prefill-package="${p.id}">Book this package</button>
-          <a class="btn btn-outline btn-block" style="margin-top:10px;" href="${waLink(contact(),'Hi! I have a question about the '+p.name+' package.')}" target="_blank">Ask on WhatsApp</a>
+
+        <div id="booking-panel-mount">
+          ${panelHtml()}
+          <div class="flex-between" style="margin-top:1rem;padding:0 1.75rem">
+            <span class="field-label" style="margin:0">Travellers</span>
+            <span class="qty-stepper" id="pd-qty">
+              <button type="button" data-step="-1" aria-label="Decrease">−</button>
+              <span>${travelers}</span>
+              <button type="button" data-step="1" aria-label="Increase">+</button>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  </section>`;
+    </section>
+  `);
+
+  const mount_ = qs('#booking-panel-mount', container);
+
+  function refreshPanel(){
+    mount_.innerHTML = panelHtml() + `
+      <div class="flex-between" style="margin-top:1rem;padding:0 1.75rem">
+        <span class="field-label" style="margin:0">Travellers</span>
+        <span class="qty-stepper" id="pd-qty">
+          <button type="button" data-step="-1" aria-label="Decrease">−</button>
+          <span>${travelers}</span>
+          <button type="button" data-step="1" aria-label="Increase">+</button>
+        </span>
+      </div>
+    `;
+    wireStepper();
+    wireBookingForm(mount_, () => ({
+      type: 'package',
+      packageId: pkg.id,
+      title: pkg.title,
+      travelers,
+      totalKes: computePackagePrice(pkg, travelers),
+    }));
+  }
+
+  function wireStepper(){
+    qs('#pd-qty', mount_)?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-step]');
+      if (!btn) return;
+      travelers = Math.max(1, travelers + Number(btn.dataset.step));
+      refreshPanel();
+    });
+  }
+
+  wireStepper();
+  wireBookingForm(mount_, () => ({
+    type: 'package',
+    packageId: pkg.id,
+    title: pkg.title,
+    travelers,
+    totalKes: computePackagePrice(pkg, travelers),
+  }));
 }

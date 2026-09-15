@@ -1,56 +1,100 @@
-import { parksById, money } from '../services/dataLoader.js';
-import { tierLabel, fmtDate } from '../utilities/helpers.js';
+import { icon } from '../utilities/icons.js';
+import { formatMoney, formatDate } from '../utilities/helpers.js';
+
+export function destinationCard(d){
+  return `
+    <article class="card">
+      <a href="#/destinations/${d.slug}">
+        <div class="card-media" style="background-image:url('${d.image}')">
+          <span class="pill">${d.region}</span>
+        </div>
+      </a>
+      <div class="card-body">
+        <h5><a href="#/destinations/${d.slug}">${d.name}</a></h5>
+        <div class="card-meta"><span>${d.tagline}</span></div>
+        <p class="muted" style="font-size:.9rem">${d.bestFor}</p>
+      </div>
+      <div class="card-footer">
+        <span class="muted" style="font-size:.85rem">From ${formatMoney(d.priceFromKes)}/day</span>
+        <a class="btn btn-outline btn-sm" href="#/destinations/${d.slug}">Explore</a>
+      </div>
+    </article>
+  `;
+}
 
 export function packageCard(p){
-  const byId = parksById();
-  return `<div class="card panel">
-    <div class="card-img" style="background-image:url('${p.img}')"><span class="tag">${p.duration} days</span></div>
-    <div class="card-body">
-      <div class="card-title">${p.name}</div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        ${p.parks.map(id=>`<span class="pill">${(byId[id]?.name||id).split(' ')[0]}</span>`).join('')}
-        <span class="pill gold">★ ${p.rating}</span>
+  return `
+    <article class="card">
+      <a href="#/packages/${p.slug}">
+        <div class="card-media" style="background-image:url('${p.image}')">
+          <span class="pill pill-amber">${p.classLabel}</span>
+          <span class="price-tag">${formatMoney(p.pricePerPersonKes)}</span>
+        </div>
+      </a>
+      <div class="card-body">
+        <h5><a href="#/packages/${p.slug}">${p.title}</a></h5>
+        <div class="card-meta">
+          <span>${icon('clock')} ${p.days} day${p.days > 1 ? 's' : ''}</span>
+          <span>${icon('map')} ${p.destinationIds.length} park${p.destinationIds.length > 1 ? 's' : ''}</span>
+        </div>
+        <p class="muted" style="font-size:.9rem">${p.summary}</p>
       </div>
-      <div class="card-foot">
-        <span class="price">${money(p.price)} <small>/ person</small></span>
-        <button class="btn btn-outline btn-sm" data-nav="booking" data-prefill-package="${p.id}">Book →</button>
+      <div class="card-footer">
+        <span class="muted" style="font-size:.85rem">per person</span>
+        <a class="btn btn-primary btn-sm" href="#/packages/${p.slug}">View Package</a>
       </div>
-    </div>
-  </div>`;
+    </article>
+  `;
 }
 
-export function parkCard(p){
-  return `<div class="card panel" data-nav="park-detail" data-id="${p.id}" style="cursor:pointer;">
-    <div class="card-img" style="background-image:url('${p.img}')"></div>
-    <div class="card-body">
-      <div class="card-title">${p.name.replace(' National Park','').replace(' National Reserve','')}</div>
-      <div class="coord">${p.coord}</div>
-    </div>
-  </div>`;
-}
-
-export function accommodationCard(a){
-  const byId = parksById();
-  return `<div class="card panel">
-    <div class="card-img" style="background-image:url('${a.img}')"><span class="tag">${tierLabel(a.tier)}</span></div>
-    <div class="card-body">
-      <div class="card-title" style="font-size:16px;">${a.name}</div>
-      <div class="coord">${byId[a.parkId]?.name||''}</div>
-      <div class="card-foot"><span class="price">${money(a.price)} <small>/ night</small></span></div>
-    </div>
-  </div>`;
-}
-
-export function bookingCard(b, packagesById){
-  const p = packagesById[b.packageId];
-  return `<div class="panel" style="padding:16px 18px;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-      <div>
-        <div class="card-title" style="font-size:16px;">${p?.name||'Custom safari'}</div>
-        <div class="coord" style="margin-top:4px;">${fmtDate(b.startDate)} · ${b.groupSize} guests · ${b.id}</div>
+export function storyCard(s){
+  return `
+    <article class="card">
+      <a href="#/stories/${s.slug}">
+        <div class="card-media" style="background-image:url('${s.image}')"></div>
+      </a>
+      <div class="card-body">
+        <div class="card-meta"><span>${icon('clock')} ${formatDate(s.date)}</span></div>
+        <h5><a href="#/stories/${s.slug}">${s.title}</a></h5>
+        <p class="muted" style="font-size:.9rem">${s.excerpt}</p>
+        <a class="btn btn-ghost btn-sm" href="#/stories/${s.slug}">Read Story ${icon('arrow')}</a>
       </div>
-      <span class="status-badge status-${b.status}">${b.status}</span>
+    </article>
+  `;
+}
+
+export function teamCard(t){
+  return `
+    <article class="card text-center">
+      <div class="card-media" style="background-image:url('${t.image}');aspect-ratio:1/1"></div>
+      <div class="card-body">
+        <h5>${t.name}</h5>
+        <div class="eyebrow" style="font-size:.8rem">${t.role}</div>
+        <p class="muted" style="font-size:.88rem;margin-top:.6rem">${t.bio}</p>
+      </div>
+    </article>
+  `;
+}
+
+export function testimonialCard(r){
+  const stars = Array.from({ length: r.rating }).map(() => icon('star')).join('');
+  return `
+    <article class="card">
+      <div class="card-body">
+        <div style="color:var(--amber-600);margin-bottom:.6rem">${stars}</div>
+        <p style="font-style:italic">&ldquo;${r.text}&rdquo;</p>
+        <strong>${r.name}</strong>
+      </div>
+    </article>
+  `;
+}
+
+export function statIconCard({ icon: name, value, label }){
+  return `
+    <div class="stat-icon-card">
+      <div class="icon-wrap">${icon(name)}</div>
+      <h3 style="margin-bottom:.2rem">${value}</h3>
+      <p class="muted" style="margin:0">${label}</p>
     </div>
-    <div class="card-foot"><span class="price">${money(b.totalPrice)}</span></div>
-  </div>`;
+  `;
 }

@@ -1,7 +1,25 @@
-import { money } from '../../services/dataLoader.js';
-import { fmtDate } from '../../utilities/helpers.js';
+/**
+ * @param {Object} opts
+ * @param {string[]} opts.columns          column headers
+ * @param {Array<Array<string>>} opts.rows  each row is an array of pre-rendered HTML strings, same length as columns
+ * @param {string} [opts.emptyMessage]
+ */
+export function dataTable({ columns, rows, emptyMessage = 'No records yet.' }){
+  if (!rows.length){
+    return `<p class="muted" style="padding:1.5rem 0">${emptyMessage}</p>`;
+  }
+  return `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr>${columns.map((c) => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
 
-export function bookingsTable(list, packagesById){
-  return `<table><thead><tr><th>ID</th><th>Package</th><th>Guest</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
-  <tbody>${list.map(b=>`<tr><td>${b.id}</td><td>${packagesById[b.packageId]?.name||'Custom'}</td><td>${b.guestEmail}</td><td>${fmtDate(b.startDate)}</td><td>${money(b.totalPrice)}</td><td><span class="status-badge status-${b.status}">${b.status}</span></td></tr>`).join('')}</tbody></table>`;
+export function statusBadge(status){
+  return `<span class="status-badge ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
 }

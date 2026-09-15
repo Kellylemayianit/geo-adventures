@@ -1,7 +1,9 @@
-/* ===================== STAT CARDS ===================== */
-.stat-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
-.stat-card{padding:16px 18px;}
-.stat-card .num{font-family:var(--font-mono); font-size:24px; color:var(--ochre-soft);}
-.stat-card .lbl{font-size:11.5px; color:var(--ink-faint); margin-top:4px;}
-.stat-card .delta{font-size:11px; color:var(--ok); margin-top:6px; font-family:var(--font-mono);}
-@media (max-width:900px){ .stat-cards{grid-template-columns:repeat(2,1fr);} }
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.75rem;}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:1.3rem;}
+.stat-card span.label{font-size:var(--fs-12);color:var(--ink-500);text-transform:uppercase;letter-spacing:.05em;}
+.stat-card strong{display:block;font-family:var(--font-display);font-size:1.7rem;color:var(--ink-900);margin:.3rem 0;}
+.stat-card .delta{font-size:var(--fs-12);font-weight:700;}
+.stat-card .delta.up{color:var(--green-700);}
+.stat-card .delta.down{color:var(--danger);}
+@media (max-width:900px){.stat-cards{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.stat-cards{grid-template-columns:1fr;}}

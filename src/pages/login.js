@@ -1,19 +1,40 @@
-export function pageLogin(){
-  return `
-  <section class="section wrap" style="max-width:420px; margin:0 auto;">
-    <div class="panel" style="padding:30px;">
-      <div class="eyebrow">Welcome back</div>
-      <h1 class="h2" style="margin-top:8px;">Log in</h1>
-      <div class="demo-note">Prototype shortcut — skip the form and jump straight into either dashboard:</div>
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button class="btn btn-outline" style="flex:1;" data-quick-login="guest">Demo guest</button>
-        <button class="btn btn-outline" style="flex:1;" data-quick-login="admin">Demo admin</button>
+import { render, qs, showToast } from '../utilities/helpers.js';
+import { signIn } from '../utilities/auth.js';
+import { navigate } from '../router.js';
+
+export async function mount(container){
+  render(container, `
+    <section class="auth-shell">
+      <div class="auth-card">
+        <h3>Welcome back</h3>
+        <p class="muted text-center">Log in to view your bookings or manage the site.</p>
+        <form id="login-form" novalidate>
+          <div class="field-group">
+            <label class="field-label" for="li-email">Email</label>
+            <input class="text-field" id="li-email" name="email" type="email" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="li-password">Password</label>
+            <input class="text-field" id="li-password" name="password" type="password" required>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Log In</button>
+        </form>
+        <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
+        <p class="muted text-center" style="font-size:.78rem;margin-top:1rem">Admin demo login: kellylemayian6@gmail.com / admin123</p>
       </div>
-      <div class="divider"></div>
-      <div class="field" style="margin-top:16px;"><label>Email</label><input type="email" id="login-email" placeholder="jane@example.com"></div>
-      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
-      <button class="btn btn-ochre btn-block" id="login-submit">Log in</button>
-      <p class="center-note">No account? <a class="link-underline" data-nav="register">Sign up</a></p>
-    </div>
-  </section>`;
+    </section>
+  `);
+
+  qs('#login-form', container).addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const fields = Object.fromEntries(fd.entries());
+    const result = signIn(fields);
+    if (!result.ok){
+      showToast(result.error, 'error');
+      return;
+    }
+    showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
+    navigate(result.user.role === 'admin' ? '#/admin' : '#/dashboard');
+  });
 }

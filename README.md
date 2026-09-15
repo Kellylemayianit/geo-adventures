@@ -1,72 +1,68 @@
-# Geo Adventures — component architecture
+# Geo Adventures Kenya — Site
 
-Rebuilt from the original single-file prototype into the structure below.
-Behavior and visual design are unchanged; the app now loads through real
-ES modules, so **serve it over HTTP** rather than opening `index.html`
-directly (`file://` blocks module imports in most browsers):
+A vanilla-JS single-page site for Geo Adventures Kenya (Kimana), rebuilt from the original
+"Adven Trip" template with the same visual design but a modular, ES6, component-based
+architecture (no framework, no build step — open `index.html` behind any static file server).
+
+## Running it locally
+
+Browsers block ES module `import` over `file://`, so serve the folder instead of double-clicking it:
 
 ```
 cd geo-adventures
-python3 -m http.server 8080     # or: npx serve .
-# open http://localhost:8080
+python3 -m http.server 8080
+# then open http://localhost:8080
 ```
 
-## Layout
+It also deploys as-is to GitHub Pages, Netlify, or any static host — no build step required.
+
+## How it's organised
 
 ```
-index.html                 SPA shell — <link> tags + <script type="module" src="src/app.js">
+index.html          SPA shell — <link> tags + <script type="module" src="src/app.js">
 styles/
-  tokens.css                variables, reset, base type, layout primitives
-  utilities/buttons.css      buttons, pills, filters, toggles, currency switcher
-  components/                header, hero, card (+ shared modal), booking, footer, toast
-  dashboard/                  sidebar/bottom-nav, stat cards, admin shell/tables/forms
+  tokens.css              variables, reset, base type, layout primitives
+  utilities/buttons.css   buttons, pills, filters, toggles, currency switcher
+  components/             header, hero, card (+ modal), booking, footer, toast
+  dashboard/              sidebar/bottom-nav, stat cards, admin shell/tables/forms
 src/
-  app.js                     route dispatch + all delegated event wiring (the kernel)
-  router.js                  hash parsing (#/route/id?query=..) + change subscription
-  pages/                     one file per route, composes components + reads data
-  components/                pure render functions (public + components/admin/)
+  app.js                  route dispatch + auth guards (the kernel)
+  router.js                hash parsing (#/route/id?query=..) + change subscription
+  pages/                    one file per route, composes components + reads data
+  components/                pure render functions (+ components/admin/)
   services/
-    mockData.js               seed data — delete once D1 is live
-    api.js                     async client; swap function BODIES for real fetch() calls later
-    dataLoader.js               the only data import surface pages/components use
+    mockData.js             seed data — delete once a real backend (D1/Airtable) is live
+    api.js                   async client; swap function BODIES for real fetch() calls later
+    dataLoader.js            the only data import surface pages/components use
   utilities/
-    helpers.js                 DOM query/inject helpers, formatting, toast, modal mount
-    booking.js                  booking form validation + custom-safari pricing
-    channelLinks.js             wa.me / mailto: / tel: / m.me link builders
-    auth.js                     mock login/session flag (in-memory)
-    icons.js                    shared inline-SVG icon set
+    helpers.js               DOM query/render helpers, formatting, toast, modal mount
+    booking.js                booking form validation + custom-safari pricing
+    channelLinks.js           wa.me / mailto: / tel: link builders — real contact details live here
+    auth.js                   mock login/session (localStorage-backed, swap for real API later)
+    icons.js                  shared inline-SVG icon set
 ```
 
-## New capabilities
+## Data & accounts (demo state)
 
-- **Admin package & accommodation CRUD** — Admin → Packages / Accommodations now
-  have working "New" / "Edit" / "Delete" actions that open a modal
-  (`components/admin/packageForm.js`, `accForm.js`) and persist through
-  `dataLoader.addPackage/editPackage/removePackage` (and the accommodation
-  equivalents), which call `services/api.js`.
-- **Multi-currency pricing** — every price is stored in USD. The header's
-  currency switcher (visible to every visitor) calls `dataLoader.setCurrency()`,
-  which is read by `dataLoader.money()` — the single formatting function every
-  page/component uses instead of a hardcoded `$`. Rates live in
-  `services/mockData.js:CURRENCIES` and are meant to be replaced by a live FX
-  source (`api.js:getCurrencyRates`). Admins can also set the **default**
-  currency for new visitors from Admin → Settings.
+- Catalogue data (parks, stay tiers, transport, packages, team, stories) lives in
+  `src/services/mockData.js` and is read-only in the UI for now.
+- Users and bookings are mutable and persisted to `localStorage` so the demo survives a refresh.
+- Demo admin login: `kellylemayian6@gmail.com` / `admin123`.
+- Any new signup becomes a `client` role account automatically.
 
-## Wiring up Cloudflare D1 (and auth/DNS) later
+## Swapping in a real backend later
 
-`services/api.js` is the seam. Every exported function currently reads/writes
-the in-memory arrays from `mockData.js`; each one is documented with the
-Worker route it should eventually call (e.g. `GET /api/packages`,
-`POST /api/bookings`, `PUT /api/accommodations/:id`). To go live:
+Only `src/services/api.js` needs to change — replace each function body with a real `fetch()`
+call (e.g. to a Cloudflare Worker in front of D1/Airtable). `dataLoader.js`, every page and
+every component are already written against that same function shape, so nothing else moves.
 
-1. Stand up a Cloudflare Worker with a D1 binding and mirror the schema
-   implied by `mockData.js` (parks, packages, accommodations, addons,
-   reviews, bookings, settings).
-2. Replace each function body in `api.js` with a `fetch()` call to the
-   Worker — nothing in `dataLoader.js` or above needs to change, since it
-   only ever imports from `api.js`.
-3. Delete `mockData.js` once nothing imports it anymore.
-4. Auth (`utilities/auth.js`) currently mocks `login`/`register` through
-   `api.js`; swap those for real calls against a D1 `users` table plus a
-   session cookie or JWT, and point custom domains/DNS at the Worker in the
-   Cloudflare dashboard.
+## Contact details
+
+The single source of truth for phone/email/WhatsApp links is `src/utilities/channelLinks.js`.
+Change it there once and it updates the header, footer, WhatsApp button, contact page and every
+booking confirmation message site-wide.
+
+## Images
+
+`assets/img/*.svg` are generated placeholders (park name on a colour gradient) — swap them for
+real photography before going live. Paths are referenced from `mockData.js` and page files.
