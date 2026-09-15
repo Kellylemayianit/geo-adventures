@@ -1,0 +1,31 @@
+/* ===================== BUTTONS / PILLS / FILTERS / TOGGLES ===================== */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:var(--radius); font-size:14px; font-weight:600; border:1px solid transparent; transition:all .12s ease; white-space:nowrap;}
+.btn-ochre{background:var(--ochre); color:#181a12;}
+.btn-ochre:hover{background:var(--ochre-soft);}
+.btn-outline{background:transparent; border-color:var(--line-hi); color:var(--ink);}
+.btn-outline:hover{border-color:var(--ochre); color:var(--ochre-soft);}
+.btn-ghost{background:transparent; color:var(--ink-dim); border:1px solid transparent;}
+.btn-ghost:hover{color:var(--ink);}
+.btn-danger{background:transparent; border-color:rgba(193,89,79,.4); color:#e6a89f;}
+.btn-danger:hover{background:rgba(193,89,79,.12); border-color:var(--danger);}
+.btn-sm{padding:6px 12px; font-size:12.5px;}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+.pill{display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:var(--radius); font-size:11.5px; font-family:var(--font-mono); border:1px solid var(--line-hi); color:var(--ink-dim);}
+.pill.gold{color:var(--ochre-soft); border-color:rgba(198,138,61,.4); background:rgba(198,138,61,.08);}
+.pill.green{color:#a9c4a6; border-color:rgba(124,148,103,.4); background:rgba(124,148,103,.08);}
+.pill.clay{color:#e0a480; border-color:rgba(180,91,60,.4); background:rgba(180,91,60,.08);}
+
+.filter-bar{display:flex; gap:8px; flex-wrap:wrap; padding:12px 14px; margin-bottom:24px;}
+.filter-bar .chip{padding:7px 13px; border-radius:var(--radius); font-size:13px; color:var(--ink-dim); border:1px solid var(--line); cursor:pointer;}
+.filter-bar .chip.active{background:var(--panel-hi); border-color:var(--ochre); color:var(--ink);}
+
+.toggle-group{display:flex; padding:3px; border-radius:var(--radius); border:1px solid var(--line);}
+.toggle-group button{padding:9px 18px; border-radius:2px; font-size:13.5px; color:var(--ink-dim); font-weight:600; background:transparent; border:none;}
+.toggle-group button.active{background:var(--panel-hi); color:var(--ink);}
+
+/* currency switcher — small select styled like a pill, lives in the header */
+.currency-switch{display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--line-hi); background:transparent;}
+.currency-switch select{background:transparent; border:none; color:var(--ink); font-family:var(--font-mono); font-size:12px; outline:none;}
+.currency-switch select option{background:var(--panel);}

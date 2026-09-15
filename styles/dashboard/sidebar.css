@@ -1,0 +1,19 @@
+/* ===================== DASHBOARD SIDEBAR / MOBILE BOTTOM-NAV ===================== */
+.dash-layout{display:grid; grid-template-columns:200px 1fr; gap:22px; align-items:flex-start;}
+.dash-sidebar{padding:14px; position:sticky; top:90px;}
+.dash-sidebar a{display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:var(--radius); font-size:13.5px; color:var(--ink-dim); margin-bottom:4px;}
+.dash-sidebar a:hover{background:rgba(255,255,255,.04); color:var(--ink);}
+.dash-sidebar a.active{background:var(--panel-hi); color:var(--ink); border:1px solid var(--line-hi);}
+
+/* bottom nav shown in place of the sidebar on narrow viewports */
+.dash-bottom-nav{display:none;}
+@media (max-width:900px){
+  .dash-layout{grid-template-columns:1fr;}
+  .dash-sidebar{display:none;}
+  .dash-bottom-nav{
+    display:flex; position:sticky; bottom:0; z-index:40; background:var(--bg); border-top:1px solid var(--line);
+    padding:8px 6px; justify-content:space-between; margin-top:20px;
+  }
+  .dash-bottom-nav a{flex:1; text-align:center; padding:8px 4px; border-radius:var(--radius); font-size:11px; color:var(--ink-dim);}
+  .dash-bottom-nav a.active{color:var(--ochre-soft); background:var(--panel-hi);}
+}

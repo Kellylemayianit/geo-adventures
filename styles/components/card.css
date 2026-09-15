@@ -1,0 +1,17 @@
+/* ===================== CARD (+ shared modal) ===================== */
+.card{overflow:hidden; display:flex; flex-direction:column; transition:border-color .15s ease;}
+.card:hover{border-color:var(--ochre);}
+.card-img{height:150px; background-size:cover; background-position:center; position:relative; border-bottom:1px solid var(--line);}
+.card-img .tag{position:absolute; top:10px; left:10px; padding:5px 9px; border-radius:var(--radius); font-family:var(--font-mono); font-size:10px; letter-spacing:.5px; text-transform:uppercase; background:var(--bg); border:1px solid var(--line-hi); color:var(--ochre-soft);}
+.card-body{padding:16px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1;}
+.card-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.card-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:12px; border-top:1px solid var(--line);}
+.price{font-family:var(--font-mono); font-size:15px; color:var(--ochre-soft); font-weight:500;}
+.price small{color:var(--ink-faint); font-size:11px;}
+
+/* shared modal — used by admin package/accommodation editors */
+.modal-backdrop{position:fixed; inset:0; z-index:300; background:rgba(10,11,8,.72); display:flex; align-items:flex-start; justify-content:center; padding:60px 20px; overflow-y:auto;}
+.modal{width:100%; max-width:560px;}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line);}
+.modal-body{padding:22px; max-height:70vh; overflow-y:auto;}
+.modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:16px 22px; border-top:1px solid var(--line);}

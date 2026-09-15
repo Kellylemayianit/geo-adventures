@@ -1,0 +1,12 @@
+/* ===================== HEADER ===================== */
+header.site{position:sticky; top:0; z-index:50; padding:14px 0; background:var(--bg); border-bottom:1px solid var(--line);}
+.header-inner{display:flex; align-items:center; justify-content:space-between; padding:6px 0; gap:14px;}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-size:21px; font-weight:600;}
+.brand .mark{width:34px; height:34px; border-radius:var(--radius); background:var(--ochre); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px; font-weight:600; color:#181a12;}
+nav.main{display:flex; align-items:center; gap:2px; flex-wrap:wrap;}
+nav.main a{padding:8px 13px; border-radius:var(--radius); font-size:14px; color:var(--ink-dim); border:1px solid transparent;}
+nav.main a:hover{color:var(--ink);}
+nav.main a.active{color:var(--ink); border-color:var(--line-hi); background:var(--panel);}
+.header-actions{display:flex; align-items:center; gap:10px;}
+.badge-role{padding:4px 10px; border-radius:var(--radius); font-size:11px; font-family:var(--font-mono); background:rgba(198,138,61,.14); color:var(--ochre-soft); border:1px solid rgba(198,138,61,.3);}
+@media (max-width:900px){ nav.main{display:none;} }

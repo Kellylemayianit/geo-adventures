@@ -1,0 +1,4 @@
+/* ===================== TOAST ===================== */
+.toast{position:fixed; bottom:24px; right:24px; z-index:200; padding:13px 18px; display:flex; align-items:center; gap:10px; transform:translateY(16px); opacity:0; transition:all .25s ease; pointer-events:none;}
+.toast.show{transform:translateY(0); opacity:1;}
+@media (max-width:560px){ .toast{left:16px; right:16px; bottom:76px;} }

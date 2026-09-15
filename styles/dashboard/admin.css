@@ -1,0 +1,10 @@
+/* ===================== ADMIN SHELL / TABLES / FORMS ===================== */
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:left; padding:9px 12px; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); border-bottom:1px solid var(--line);}
+td{padding:12px; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+tr:hover td{background:rgba(255,255,255,.02);}
+.status-badge{padding:4px 9px; border-radius:var(--radius); font-size:10.5px; font-family:var(--font-mono);}
+.status-pending{background:rgba(198,138,61,.14); color:var(--ochre-soft);}
+.status-confirmed{background:rgba(124,148,103,.16); color:#a9c4a6;}
+.status-cancelled{background:rgba(193,89,79,.14); color:#e6a89f;}
+.admin-row-actions{display:flex; gap:6px;}

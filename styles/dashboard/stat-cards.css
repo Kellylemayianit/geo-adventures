@@ -1,0 +1,7 @@
+/* ===================== STAT CARDS ===================== */
+.stat-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+.stat-card{padding:16px 18px;}
+.stat-card .num{font-family:var(--font-mono); font-size:24px; color:var(--ochre-soft);}
+.stat-card .lbl{font-size:11.5px; color:var(--ink-faint); margin-top:4px;}
+.stat-card .delta{font-size:11px; color:var(--ok); margin-top:6px; font-family:var(--font-mono);}
+@media (max-width:900px){ .stat-cards{grid-template-columns:repeat(2,1fr);} }
