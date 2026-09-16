@@ -1,0 +1,15 @@
+{
+  "name": "geo-adventures-api",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 execute geo-adventures-db --file=./migrations/0001_schema.sql --remote",
+    "db:seed": "wrangler d1 execute geo-adventures-db --file=./migrations/0002_seed.sql --remote",
+    "db:migrate:local": "wrangler d1 execute geo-adventures-db --file=./migrations/0001_schema.sql --local",
+    "db:seed:local": "wrangler d1 execute geo-adventures-db --file=./migrations/0002_seed.sql --local"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}

@@ -1,3 +1,8 @@
+// NOTE: no longer imported by api.js — the app now calls the real Worker/D1 backend
+// (see worker/). This file is kept only as the historical source the D1 seed data in
+// worker/migrations/0002_seed.sql was generated from. Safe to delete once you're confident
+// the migration is complete.
+//
 // Seed data. Everything mutable (users, bookings) is mirrored into localStorage so the
 // demo persists across a refresh. Read-only catalogue data (destinations, stays, transport,
 // packages, team, stories) just lives in memory here — point dataLoader.js at a real API

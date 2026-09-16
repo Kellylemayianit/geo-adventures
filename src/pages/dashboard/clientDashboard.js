@@ -6,7 +6,7 @@ import { getBookings } from '../../services/dataLoader.js';
 
 export async function mount(container){
   const user = currentUser();
-  const bookings = await getBookings((b) => b.userId === user.id || b.phone === user.phone);
+  const bookings = await getBookings(); // Worker already scopes this to the logged-in user
 
   render(container, `
     <div class="dash-shell">

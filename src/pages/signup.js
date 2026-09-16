@@ -32,11 +32,14 @@ export async function mount(container){
     </section>
   `);
 
-  qs('#signup-form', container).addEventListener('submit', (e) => {
+  qs('#signup-form', container).addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
     const fd = new FormData(e.target);
     const fields = Object.fromEntries(fd.entries());
-    const result = signUp(fields);
+    const result = await signUp(fields);
+    submitBtn.disabled = false;
     if (!result.ok){
       showToast(result.error, 'error');
       return;

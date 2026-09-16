@@ -21,6 +21,8 @@ export const getStories = () => cached('stories', api.fetchStories);
 export const getStory = (slug) => api.fetchStory(slug);
 export const getTestimonials = () => cached('testimonials', api.fetchTestimonials);
 
-export const getBookings = (filterFn) => api.fetchBookings(filterFn);
+// Filtering by "mine vs all" now happens server-side based on the auth token, so this
+// takes no filter function — the Worker returns only what the logged-in user is allowed to see.
+export const getBookings = () => api.fetchBookings();
 export const createBooking = (booking) => api.createBooking(booking);
 export const setBookingStatus = (id, status) => api.setBookingStatus(id, status);

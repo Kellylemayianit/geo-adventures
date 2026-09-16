@@ -1,28 +1,18 @@
-// Mock auth. Session lives in localStorage only so a page refresh doesn't log people out
-// mid-demo — there is no server behind this. Swap signIn/signUp bodies for real API calls later.
-import { getUsers, saveUsers } from '../services/mockData.js';
+// Real auth against the Worker's /api/auth endpoints. Session (token + user) lives in
+// localStorage via session.js so a page refresh doesn't log people out.
+import { loginRequest, signupRequest } from '../services/api.js';
+import { getStoredUser, setSession, clearSession } from './session.js';
 
-const SESSION_KEY = 'gak_session';
 const listeners = new Set();
 
-function readSession(){
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
-  catch { return null; }
-}
-function writeSession(user){
-  if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-  else localStorage.removeItem(SESSION_KEY);
-  listeners.forEach((fn) => fn(user));
-}
-
 export function currentUser(){
-  return readSession();
+  return getStoredUser();
 }
 export function isLoggedIn(){
-  return !!readSession();
+  return !!getStoredUser();
 }
 export function isAdmin(){
-  const u = readSession();
+  const u = getStoredUser();
   return !!u && u.role === 'admin';
 }
 export function onAuthChange(fn){
@@ -30,36 +20,31 @@ export function onAuthChange(fn){
   return () => listeners.delete(fn);
 }
 
-export function signIn({ email, password }){
-  const users = getUsers();
-  const user = users.find((u) => u.email.toLowerCase() === String(email).toLowerCase());
-  if (!user) return { ok: false, error: 'No account found with that email.' };
-  if (user.password !== password) return { ok: false, error: 'Incorrect password.' };
-  const { password: _pw, ...safeUser } = user;
-  writeSession(safeUser);
-  return { ok: true, user: safeUser };
+export async function signIn({ email, password }){
+  try {
+    const { token, user } = await loginRequest(email, password);
+    setSession(token, user);
+    listeners.forEach((fn) => fn(user));
+    return { ok: true, user };
+  } catch (e){
+    return { ok: false, error: e.message };
+  }
 }
 
-export function signUp({ name, email, password, phone }){
-  const users = getUsers();
-  if (users.some((u) => u.email.toLowerCase() === String(email).toLowerCase())){
-    return { ok: false, error: 'An account with that email already exists.' };
+export async function signUp({ name, email, password, phone }){
+  try {
+    const { token, user } = await signupRequest(name, email, password, phone);
+    setSession(token, user);
+    listeners.forEach((fn) => fn(user));
+    return { ok: true, user };
+  } catch (e){
+    return { ok: false, error: e.message };
   }
-  const newUser = {
-    id: 'u' + Date.now(),
-    name, email, phone, password,
-    role: 'client',
-    createdAt: new Date().toISOString(),
-  };
-  users.push(newUser);
-  saveUsers(users);
-  const { password: _pw, ...safeUser } = newUser;
-  writeSession(safeUser);
-  return { ok: true, user: safeUser };
 }
 
 export function signOut(){
-  writeSession(null);
+  clearSession();
+  listeners.forEach((fn) => fn(null));
 }
 
 export function requireAuth(role){

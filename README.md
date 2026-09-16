@@ -42,19 +42,20 @@ src/
     icons.js                  shared inline-SVG icon set
 ```
 
-## Data & accounts (demo state)
+## Backend: Cloudflare Worker + D1
 
-- Catalogue data (parks, stay tiers, transport, packages, team, stories) lives in
-  `src/services/mockData.js` and is read-only in the UI for now.
-- Users and bookings are mutable and persisted to `localStorage` so the demo survives a refresh.
-- Demo admin login: `kellylemayian6@gmail.com` / `admin123`.
-- Any new signup becomes a `client` role account automatically.
+The site now runs against a real backend — see `worker/` (schema, seed data, and the API
+itself) and `DEPLOY.md` in this folder for the exact commands to take it live today.
 
-## Swapping in a real backend later
-
-Only `src/services/api.js` needs to change — replace each function body with a real `fetch()`
-call (e.g. to a Cloudflare Worker in front of D1/Airtable). `dataLoader.js`, every page and
-every component are already written against that same function shape, so nothing else moves.
+- `src/services/config.js` — set `API_BASE_URL` to your deployed Worker URL
+- `src/services/api.js` — the only file that talks to the network (`apiFetch` helper)
+- `src/utilities/auth.js` — calls `/api/auth/login` and `/api/auth/signup`, session token
+  stored via `src/utilities/session.js`
+- `src/services/mockData.js` — no longer imported anywhere; kept only as the source the D1
+  seed data was generated from, safe to delete once you trust the migration
+- Demo admin login (seeded in D1): `kellylemayian6@gmail.com` / `admin123` — change this
+  after first deploy (see `DEPLOY.md` step 8)
+- Any new signup becomes a `client` role account automatically
 
 ## Contact details
 

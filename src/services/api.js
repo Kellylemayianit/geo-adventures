@@ -1,49 +1,38 @@
-import {
-  DESTINATIONS, STAY_TIERS, TRANSPORT_OPTIONS, PACKAGES, TEAM, STORIES, TESTIMONIALS,
-  getBookings, addBooking, updateBookingStatus,
-} from './mockData.js';
+import { API_BASE_URL } from './config.js';
+import { getToken } from '../utilities/session.js';
 
-// Every function here is async on purpose, even though the mock version resolves instantly —
-// this is the seam where real fetch() calls to the eventual API/D1 backend get dropped in.
-// Pages/components should never import mockData.js directly; go through dataLoader.js instead.
+// The one seam that talks to the network. Every function here matches the shape it had when
+// it read from mockData.js, so dataLoader.js and every page/component needed zero changes.
 
-export async function fetchDestinations(){
-  return DESTINATIONS;
+export async function apiFetch(path, options = {}){
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  let data = null;
+  try { data = await res.json(); } catch { /* empty body */ }
+  if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+  return data;
 }
-export async function fetchDestination(slug){
-  return DESTINATIONS.find((d) => d.slug === slug) || null;
-}
-export async function fetchStayTiers(){
-  return STAY_TIERS;
-}
-export async function fetchTransportOptions(){
-  return TRANSPORT_OPTIONS;
-}
-export async function fetchPackages(){
-  return PACKAGES;
-}
-export async function fetchPackage(slug){
-  return PACKAGES.find((p) => p.slug === slug) || null;
-}
-export async function fetchTeam(){
-  return TEAM;
-}
-export async function fetchStories(){
-  return STORIES;
-}
-export async function fetchStory(slug){
-  return STORIES.find((s) => s.slug === slug) || null;
-}
-export async function fetchTestimonials(){
-  return TESTIMONIALS;
-}
-export async function fetchBookings(filterFn){
-  const all = getBookings();
-  return filterFn ? all.filter(filterFn) : all;
-}
-export async function createBooking(booking){
-  return addBooking(booking);
-}
-export async function setBookingStatus(id, status){
-  return updateBookingStatus(id, status);
-}
+
+export const fetchDestinations = () => apiFetch('/api/destinations');
+export const fetchDestination = (slug) => apiFetch(`/api/destinations/${encodeURIComponent(slug)}`);
+export const fetchStayTiers = () => apiFetch('/api/stay-tiers');
+export const fetchTransportOptions = () => apiFetch('/api/transport');
+export const fetchPackages = () => apiFetch('/api/packages');
+export const fetchPackage = (slug) => apiFetch(`/api/packages/${encodeURIComponent(slug)}`);
+export const fetchTeam = () => apiFetch('/api/team');
+export const fetchStories = () => apiFetch('/api/stories');
+export const fetchStory = (slug) => apiFetch(`/api/stories/${encodeURIComponent(slug)}`);
+export const fetchTestimonials = () => apiFetch('/api/testimonials');
+
+export const fetchBookings = () => apiFetch('/api/bookings');
+export const createBooking = (booking) => apiFetch('/api/bookings', { method: 'POST', body: JSON.stringify(booking) });
+export const setBookingStatus = (id, status) =>
+  apiFetch(`/api/bookings/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+
+export const loginRequest = (email, password) =>
+  apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+export const signupRequest = (name, email, password, phone) =>
+  apiFetch('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password, phone }) });

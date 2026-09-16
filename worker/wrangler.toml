@@ -1,0 +1,17 @@
+name = "geo-adventures-api"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "geo-adventures-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+# Lock this down to your real site origin once it's deployed, e.g. "https://geoadventureskenya.com"
+# Using "*" works immediately but allows any site to call the API.
+ALLOWED_ORIGIN = "*"
+
+# WORKER_SECRET (used to sign session tokens) is NOT set here — set it with:
+#   wrangler secret put WORKER_SECRET
+# Never commit a real secret into this file.
