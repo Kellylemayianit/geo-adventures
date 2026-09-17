@@ -7,10 +7,9 @@ binding = "DB"
 database_name = "geo-adventures-db"
 database_id = "2ee58e69-afb6-4c93-9f05-7ba5641c57d3"
 
+
 [vars]
-# Lock this down to your real site origin once it's deployed, e.g. "https://geoadventureskenya.com"
-# Using "*" works immediately but allows any site to call the API.
-ALLOWED_ORIGIN = "https://geo-adventures-api.kaelentechnologies.workers.dev/"
+ALLOWED_ORIGIN = "https://geo-adventures.pages.dev"
 
 # WORKER_SECRET (used to sign session tokens) is NOT set here — set it with:
 #   wrangler secret put WORKER_SECRET
