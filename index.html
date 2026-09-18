@@ -19,6 +19,21 @@
 <link rel="stylesheet" href="styles/dashboard/sidebar.css">
 <link rel="stylesheet" href="styles/dashboard/stat-cards.css">
 <link rel="stylesheet" href="styles/dashboard/admin.css">
+
+<!-- Preload modules almost every page needs, so the first navigation to any page doesn't
+     serially discover them one import at a time. -->
+<link rel="modulepreload" href="src/utilities/helpers.js">
+<link rel="modulepreload" href="src/utilities/icons.js">
+<link rel="modulepreload" href="src/utilities/session.js">
+<link rel="modulepreload" href="src/utilities/auth.js">
+<link rel="modulepreload" href="src/utilities/channelLinks.js">
+<link rel="modulepreload" href="src/services/config.js">
+<link rel="modulepreload" href="src/services/api.js">
+<link rel="modulepreload" href="src/services/dataLoader.js">
+<link rel="modulepreload" href="src/router.js">
+<link rel="modulepreload" href="src/components/header.js">
+<link rel="modulepreload" href="src/components/footer.js">
+<link rel="modulepreload" href="src/components/card.js">
 </head>
 <body>
 <div id="app-header"></div>

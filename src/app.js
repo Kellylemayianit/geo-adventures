@@ -1,6 +1,7 @@
 import { defineRoutes, onRouteChange, startRouter, navigate } from './router.js';
 import { renderHeader } from './components/header.js';
 import { renderFooter } from './components/footer.js';
+import { renderAppBar } from './components/appBar.js';
 import { qs, showToast } from './utilities/helpers.js';
 import { isLoggedIn, isAdmin } from './utilities/auth.js';
 
@@ -35,9 +36,9 @@ const mainEl = qs('#app-main');
 const footerEl = qs('#app-footer');
 
 async function dispatch({ path, query, matched }){
-  renderHeader(headerEl, resolveActiveNav(path));
-
   if (!matched){
+    renderHeader(headerEl, resolveActiveNav(path));
+    footerEl.hidden = false;
     const notFound = await import('./pages/notFound.js');
     notFound.mount(mainEl, { params: {}, query });
     renderFooter(footerEl);
@@ -46,6 +47,7 @@ async function dispatch({ path, query, matched }){
   }
 
   const { route, params } = matched;
+  const isAppArea = !!route.auth; // dashboard/admin/account routes get their own shell, not the public site nav
 
   if (route.auth === 'client' && !isLoggedIn()){
     showToast('Please log in to view that page.', 'error');
@@ -58,6 +60,15 @@ async function dispatch({ path, query, matched }){
     return;
   }
 
+  if (isAppArea){
+    renderAppBar(headerEl);
+    footerEl.hidden = true;
+    footerEl.innerHTML = '';
+  } else {
+    renderHeader(headerEl, resolveActiveNav(path));
+    footerEl.hidden = false;
+  }
+
   // Only show a loading placeholder if the page genuinely takes a moment - on fast
   // transitions (cached module + cached data) this avoids a visible flash on every click.
   const loadingTimer = setTimeout(() => {
@@ -67,7 +78,7 @@ async function dispatch({ path, query, matched }){
   const mod = await route.load();
   await mod.mount(mainEl, { params, query });
   clearTimeout(loadingTimer);
-  renderFooter(footerEl);
+  if (!isAppArea) renderFooter(footerEl);
   window.scrollTo(0, 0);
 }
 

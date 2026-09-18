@@ -84,3 +84,10 @@
   .dropdown-menu{position:static;border:0;box-shadow:none;padding-left:1rem;display:none;}
   .has-dropdown.is-open .dropdown-menu{display:block;}
 }
+
+@media (max-width: 480px){
+  /* The header row gets tight on small phones - drop the duplicate CTA button
+     (it's also the first item in the mobile menu) and keep just the essentials. */
+  .nav-actions > .btn{display:none;}
+  .brand{font-size:1.05rem;}
+}

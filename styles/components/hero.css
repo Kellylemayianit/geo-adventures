@@ -35,5 +35,5 @@
   color:#fff;text-align:center;
 }
 .page-banner h1{color:#fff;margin-bottom:.5rem;}
-.breadcrumb{display:inline-flex;gap:.5rem;font-size:var(--fs-14);color:rgba(255,255,255,.8);}
+.breadcrumb{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:.5rem;font-size:var(--fs-14);color:rgba(255,255,255,.8);}
 .breadcrumb a{color:#fff;font-weight:700;}
