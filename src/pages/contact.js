@@ -5,7 +5,7 @@ import { CONTACT, waLink, telLink, mailtoLink, buildEnquiryMessage } from '../ut
 
 export async function mount(container){
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-contact.svg', title: 'Contact Us', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Contact' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/1993_158-11A_Masai_Mara_sunset.jpg', title: 'Contact Us', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Contact' }] })}
     <section class="section">
       <div class="container grid grid-2" style="align-items:start">
         <div>

@@ -6,6 +6,7 @@ const CLIENT_LINKS = [
   { label: 'My Bookings', href: '#/dashboard', match: '#/dashboard', icon: 'dashboard' },
   { label: 'Build a Safari', href: '#/build', match: '#/build', icon: 'map' },
   { label: 'Browse Packages', href: '#/packages', match: '#/packages', icon: 'car' },
+  { label: 'Change Password', href: '#/account/password', match: '#/account/password', icon: 'user' },
 ];
 
 const ADMIN_LINKS = [
@@ -13,6 +14,8 @@ const ADMIN_LINKS = [
   { label: 'Bookings', href: '#/admin/bookings', match: '#/admin/bookings', icon: 'clock' },
   { label: 'Packages', href: '#/admin/packages', match: '#/admin/packages', icon: 'map' },
   { label: 'Destinations', href: '#/admin/destinations', match: '#/admin/destinations', icon: 'map' },
+  { label: 'Users', href: '#/admin/users', match: '#/admin/users', icon: 'users' },
+  { label: 'Change Password', href: '#/account/password', match: '#/account/password', icon: 'user' },
 ];
 
 export function renderSidebar(root, { role, active }){

@@ -4,6 +4,8 @@
 }
 .card:hover{box-shadow:var(--shadow);}
 .card-media{position:relative;aspect-ratio:4/3;background:var(--paper-dim) center/cover no-repeat;}
+.avatar-media{display:flex;align-items:center;justify-content:center;}
+.avatar-initials{font-family:var(--font-display);font-size:2.4rem;color:#fff;letter-spacing:.02em;}
 .card-media .pill{position:absolute;top:.8rem;left:.8rem;}
 .card-media .price-tag{
   position:absolute;bottom:.8rem;right:.8rem;background:#fff;color:var(--green-700);

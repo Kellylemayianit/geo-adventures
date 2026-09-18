@@ -19,10 +19,12 @@ const ROUTES = [
   { path: '/login', load: () => import('./pages/login.js') },
   { path: '/signup', load: () => import('./pages/signup.js') },
   { path: '/dashboard', load: () => import('./pages/dashboard/clientDashboard.js'), auth: 'client' },
+  { path: '/account/password', load: () => import('./pages/account/changePassword.js'), auth: 'client' },
   { path: '/admin', load: () => import('./pages/dashboard/adminDashboard.js'), auth: 'admin' },
   { path: '/admin/bookings', load: () => import('./pages/dashboard/adminBookings.js'), auth: 'admin' },
   { path: '/admin/packages', load: () => import('./pages/dashboard/adminPackages.js'), auth: 'admin' },
   { path: '/admin/destinations', load: () => import('./pages/dashboard/adminDestinations.js'), auth: 'admin' },
+  { path: '/admin/users', load: () => import('./pages/dashboard/adminUsers.js'), auth: 'admin' },
   { path: '/404', load: () => import('./pages/notFound.js') },
 ];
 
@@ -56,9 +58,15 @@ async function dispatch({ path, query, matched }){
     return;
   }
 
-  mainEl.innerHTML = '<div class="section-tight container"><p class="muted">Loading…</p></div>';
+  // Only show a loading placeholder if the page genuinely takes a moment - on fast
+  // transitions (cached module + cached data) this avoids a visible flash on every click.
+  const loadingTimer = setTimeout(() => {
+    mainEl.innerHTML = '<div class="section-tight container"><p class="muted">Loading…</p></div>';
+  }, 200);
+
   const mod = await route.load();
   await mod.mount(mainEl, { params, query });
+  clearTimeout(loadingTimer);
   renderFooter(footerEl);
   window.scrollTo(0, 0);
 }

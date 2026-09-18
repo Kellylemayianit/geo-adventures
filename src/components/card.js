@@ -63,10 +63,16 @@ export function storyCard(s){
   `;
 }
 
-export function teamCard(t){
+const AVATAR_PALETTE = ['#41722c', '#8a551a', '#3a6626', '#a57136', '#63ab45'];
+
+export function teamCard(t, index = 0){
+  const initials = t.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const color = AVATAR_PALETTE[index % AVATAR_PALETTE.length];
   return `
     <article class="card text-center">
-      <div class="card-media" style="background-image:url('${t.image}');aspect-ratio:1/1"></div>
+      <div class="card-media avatar-media" style="background:${color};aspect-ratio:1/1">
+        <span class="avatar-initials">${initials}</span>
+      </div>
       <div class="card-body">
         <h5>${t.name}</h5>
         <div class="eyebrow" style="font-size:.8rem">${t.role}</div>

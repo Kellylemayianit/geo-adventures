@@ -20,7 +20,7 @@ export async function mount(container){
           <button class="btn btn-primary btn-block" type="submit">Log In</button>
         </form>
         <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
-        <p class="muted text-center" style="font-size:.78rem;margin-top:1rem">Admin demo login: kellylemayian6@gmail.com / admin123</p>
+        <p class="muted text-center" style="font-size:.78rem;margin-top:1rem">Forgotten your password? Message us on <a href="#/contact">WhatsApp</a> and we'll reset it.</p>
       </div>
     </section>
   `);

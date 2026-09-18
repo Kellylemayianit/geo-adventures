@@ -83,6 +83,10 @@ export function renderHeader(root, activeRoute = ''){
   wireHeader(root);
 }
 
+// The header is re-rendered on every route change, but document-level listeners for
+// closing dropdowns must only ever be attached once, or they'd stack up on every navigation.
+let globalListenersAttached = false;
+
 function wireHeader(root){
   const toggle = qs('#nav-toggle', root);
   const nav = qs('#main-nav', root);
@@ -93,9 +97,11 @@ function wireHeader(root){
 
   qsa('[data-dropdown-trigger]', root).forEach((trigger) => {
     trigger.addEventListener('click', (e) => {
-      if (window.innerWidth > 991) return;
       e.preventDefault();
-      trigger.closest('.has-dropdown').classList.toggle('is-open');
+      const parent = trigger.closest('.has-dropdown');
+      const willOpen = !parent.classList.contains('is-open');
+      qsa('.has-dropdown', root).forEach((d) => d.classList.remove('is-open')); // only one open at a time
+      if (willOpen) parent.classList.add('is-open');
     });
   });
 
@@ -103,4 +109,20 @@ function wireHeader(root){
     signOut();
     window.location.hash = '#/';
   });
+
+  if (!globalListenersAttached){
+    globalListenersAttached = true;
+    // Close any open dropdown on an outside click or Escape - deliberate open/close only.
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.has-dropdown')) qsa('.has-dropdown').forEach((d) => d.classList.remove('is-open'));
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') qsa('.has-dropdown').forEach((d) => d.classList.remove('is-open'));
+    });
+    // Close the mobile menu after any in-page navigation.
+    window.addEventListener('hashchange', () => {
+      qs('#main-nav')?.classList.remove('is-open');
+      qs('#nav-toggle')?.setAttribute('aria-expanded', 'false');
+    });
+  }
 }

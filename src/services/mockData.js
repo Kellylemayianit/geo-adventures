@@ -13,7 +13,7 @@ export const DESTINATIONS = [
     id: 'amboseli', slug: 'amboseli', name: 'Amboseli National Park', region: 'South Rift, near Kimana',
     tagline: 'Big elephants, bigger mountain',
     description: 'Amboseli sits in our backyard here in Kimana — you can watch its elephant herds cross the plains with Kilimanjaro standing over them like a painting. This is usually the first park we send first-time visitors to, and the one our regulars keep coming back for.',
-    image: 'assets/img/dest-amboseli.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg',
     activities: ['Game drives', 'Kilimanjaro viewpoints', 'Maasai village visit', 'Birdwatching'],
     bestFor: 'Elephants, Kilimanjaro views, short trips from Kimana',
     priceFromKes: 3500,
@@ -22,7 +22,7 @@ export const DESTINATIONS = [
     id: 'maasai-mara', slug: 'maasai-mara', name: 'Maasai Mara National Reserve', region: 'Narok County',
     tagline: 'Home of the great wildebeest crossing',
     description: 'The Mara needs no introduction — endless grass, the big cats that own it, and if your dates line up, the wildebeest crossing the Mara River. It is a longer drive from Kimana, so most of our Mara packages are built for 4 days and up.',
-    image: 'assets/img/dest-mara.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Maasai_Mara_National_Reserve_Kenya.jpg',
     activities: ['Big cat game drives', 'Wildebeest migration (seasonal)', 'Hot air balloon add-on', 'Maasai cultural visit'],
     bestFor: 'Big cats, the migration, classic Kenya safari',
     priceFromKes: 4200,
@@ -31,7 +31,7 @@ export const DESTINATIONS = [
     id: 'tsavo-east', slug: 'tsavo-east', name: 'Tsavo East National Park', region: 'Taita-Taveta County',
     tagline: 'Red elephants and open plains',
     description: 'Tsavo East is raw and wide open — its elephants turn red from dusting themselves in the local soil. It pairs well with Amboseli on a longer circuit, and the drive down from Kimana passes some of the best roadside views in the south.',
-    image: 'assets/img/dest-tsavo-east.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/African_Bush_Elephant_mud_bath.png',
     activities: ['Game drives', 'Lugard Falls', 'Aruba Dam wildlife viewing'],
     bestFor: 'Red elephants, open savannah, combining with Amboseli',
     priceFromKes: 3200,
@@ -40,7 +40,7 @@ export const DESTINATIONS = [
     id: 'tsavo-west', slug: 'tsavo-west', name: 'Tsavo West National Park', region: 'Taita-Taveta County',
     tagline: 'Volcanic hills and crystal springs',
     description: 'Tsavo West trades open plains for volcanic hills, lava flows and the clear waters of Mzima Springs, where you can watch hippos underwater from a viewing chamber. A favourite add-on for people who want more scenery variety in one trip.',
-    image: 'assets/img/dest-tsavo-west.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/View_of_the_Tsavo_River_in_Tsavo_West_National_Park.jpg',
     activities: ['Mzima Springs', 'Shetani Lava Flows', 'Game drives', 'Rhino sanctuary'],
     bestFor: 'Scenery, springs, a change of pace from open plains',
     priceFromKes: 3200,
@@ -49,7 +49,7 @@ export const DESTINATIONS = [
     id: 'lake-nakuru', slug: 'lake-nakuru', name: 'Lake Nakuru National Park', region: 'Great Rift Valley',
     tagline: 'Flamingos on the Rift Valley floor',
     description: 'Deep in the Rift Valley, Lake Nakuru is where we send guests chasing flamingo photographs and rhino sightings in one stop. It fits naturally into a Rift Valley circuit alongside other lakes in the region.',
-    image: 'assets/img/dest-nakuru.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Large_number_of_flamingos_at_Lake_Nakuru.jpg',
     activities: ['Flamingo viewing', 'Rhino tracking', 'Baboon Cliff viewpoint'],
     bestFor: 'Flamingos, rhinos, Rift Valley scenery',
     priceFromKes: 3000,
@@ -58,7 +58,7 @@ export const DESTINATIONS = [
     id: 'nairobi-np', slug: 'nairobi-national-park', name: 'Nairobi National Park', region: 'Nairobi',
     tagline: 'A safari with the city skyline behind it',
     description: 'A convenient stop for guests flying in or out of Nairobi — real wildlife, city skyline in the background. We often use it as the first or last stop on a longer circuit rather than a standalone trip.',
-    image: 'assets/img/dest-nairobi-np.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi_Skyline_Savannah_Kenya_May19_R1600687.jpg',
     activities: ['Game drives', 'Animal orphanage visit', 'Short walking trail'],
     bestFor: 'Airport layovers, quick half-day safaris',
     priceFromKes: 2200,
@@ -103,7 +103,7 @@ export const PACKAGES = [
   {
     id: 'p1', slug: 'amboseli-weekend', title: 'Amboseli Weekend Escape', classLabel: 'Budget', days: 3,
     destinationIds: ['amboseli'], stayTier: 'budget', transportId: 'saloon',
-    pricePerPersonKes: 21500, image: 'assets/img/pkg-amboseli-weekend.svg',
+    pricePerPersonKes: 21500, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg',
     summary: 'A quick, affordable dash to Amboseli from Kimana — elephants and Kilimanjaro over a long weekend.',
     highlights: ['2 nights budget camp', 'Two game drives', 'Return transport from Kimana', 'Maasai village stop'],
     itinerary: [
@@ -115,7 +115,7 @@ export const PACKAGES = [
   {
     id: 'p2', slug: 'amboseli-tsavo-circuit', title: 'Amboseli & Tsavo Circuit', classLabel: 'Comfort', days: 5,
     destinationIds: ['amboseli', 'tsavo-east', 'tsavo-west'], stayTier: 'midrange', transportId: '4x4',
-    pricePerPersonKes: 68000, image: 'assets/img/pkg-amboseli-tsavo.svg',
+    pricePerPersonKes: 68000, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/View_of_the_Tsavo_River_in_Tsavo_West_National_Park.jpg',
     summary: 'Elephants at Amboseli, red elephants and springs at Tsavo — the classic southern circuit done properly.',
     highlights: ['4 nights comfort lodges', 'Private 4x4 throughout', 'Mzima Springs visit', 'Park fees included'],
     itinerary: [
@@ -129,7 +129,7 @@ export const PACKAGES = [
   {
     id: 'p3', slug: 'mara-migration-luxury', title: 'Maasai Mara Migration Luxury', classLabel: 'Luxury', days: 4,
     destinationIds: ['maasai-mara'], stayTier: 'luxury', transportId: '4x4',
-    pricePerPersonKes: 145000, image: 'assets/img/pkg-mara-luxury.svg',
+    pricePerPersonKes: 145000, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Maasai_Mara_National_Reserve_Kenya.jpg',
     summary: 'Front-row seats to the Mara, in a luxury tented camp on the reserve\u2019s edge.',
     highlights: ['3 nights luxury tented camp', 'Private 4x4 with pop-up roof', 'Optional balloon safari add-on', 'Cultural Maasai village visit'],
     itinerary: [
@@ -142,7 +142,7 @@ export const PACKAGES = [
   {
     id: 'p4', slug: 'rift-valley-explorer', title: 'Rift Valley Explorer', classLabel: 'Comfort', days: 6,
     destinationIds: ['lake-nakuru', 'maasai-mara'], stayTier: 'midrange', transportId: '4x4',
-    pricePerPersonKes: 92000, image: 'assets/img/pkg-rift-valley.svg',
+    pricePerPersonKes: 92000, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Large_number_of_flamingos_at_Lake_Nakuru.jpg',
     summary: 'Flamingos and rhinos at Lake Nakuru, then on to the Mara — the full Rift Valley story in one trip.',
     highlights: ['5 nights comfort lodges', 'Private 4x4 throughout', 'Rhino tracking at Nakuru', 'Big cat drives in the Mara'],
     itinerary: [
@@ -157,7 +157,7 @@ export const PACKAGES = [
   {
     id: 'p5', slug: 'kimana-day-safari', title: 'Kimana Day Safari', classLabel: 'Budget', days: 1,
     destinationIds: ['amboseli'], stayTier: 'budget', transportId: 'saloon',
-    pricePerPersonKes: 8500, image: 'assets/img/pkg-day-safari.svg',
+    pricePerPersonKes: 8500, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg',
     summary: 'No time for a full trip? A single day in Amboseli, out and back from Kimana before dark.',
     highlights: ['Full day game drive', 'Packed lunch', 'Return transport from Kimana', 'No overnight needed'],
     itinerary: [
@@ -167,7 +167,7 @@ export const PACKAGES = [
   {
     id: 'p6', slug: 'grand-southern-luxury', title: 'Grand Southern Circuit', classLabel: 'Luxury', days: 7,
     destinationIds: ['amboseli', 'tsavo-west', 'tsavo-east'], stayTier: 'luxury', transportId: '4x4',
-    pricePerPersonKes: 210000, image: 'assets/img/pkg-grand-southern.svg',
+    pricePerPersonKes: 210000, image: 'https://commons.wikimedia.org/wiki/Special:FilePath/View_of_the_Tsavo_River_in_Tsavo_West_National_Park.jpg',
     summary: 'The full southern circuit at a slower, more indulgent pace — Amboseli and both Tsavo parks in luxury camps.',
     highlights: ['6 nights luxury camps', 'Private 4x4 with driver-guide throughout', 'All park fees included', 'Mzima Springs & Shetani Lava Flows'],
     itinerary: [
@@ -183,29 +183,29 @@ export const PACKAGES = [
 ];
 
 export const TEAM = [
-  { id: 't1', name: 'Kelly Lemayian', role: 'Founder & Lead Guide', bio: 'Grew up around Kimana and Amboseli, and has been guiding visitors through the south for years.', image: 'assets/img/team-kelly.svg' },
-  { id: 't2', name: 'Naserian Sankale', role: 'Bookings & Guest Care', bio: 'Handles every enquiry personally — the first voice most guests hear on WhatsApp.', image: 'assets/img/team-naserian.svg' },
-  { id: 't3', name: 'Joseph Mwangangi', role: 'Driver-Guide, 4x4 Fleet', bio: 'Knows the Tsavo and Amboseli tracks like the back of his hand.', image: 'assets/img/team-joseph.svg' },
-  { id: 't4', name: 'Grace Wanjiru', role: 'Transport Coordinator', bio: 'Matches every booking to the right vehicle, from saloon cars to the safari Land Cruisers.', image: 'assets/img/team-grace.svg' },
+  { id: 't1', name: 'Kelly Lemayian', role: 'Founder & Lead Guide', bio: 'Grew up around Kimana and Amboseli, and has been guiding visitors through the south for years.', image: '(unused)' },
+  { id: 't2', name: 'Naserian Sankale', role: 'Bookings & Guest Care', bio: 'Handles every enquiry personally — the first voice most guests hear on WhatsApp.', image: '(unused)' },
+  { id: 't3', name: 'Joseph Mwangangi', role: 'Driver-Guide, 4x4 Fleet', bio: 'Knows the Tsavo and Amboseli tracks like the back of his hand.', image: '(unused)' },
+  { id: 't4', name: 'Grace Wanjiru', role: 'Transport Coordinator', bio: 'Matches every booking to the right vehicle, from saloon cars to the safari Land Cruisers.', image: '(unused)' },
 ];
 
 export const STORIES = [
   {
     id: 's1', slug: 'why-we-start-in-kimana', title: 'Why Every Journey Starts in Kimana', date: '2026-07-12',
     excerpt: 'Kimana is not just our address — it is the reason our Amboseli trips are shorter, cheaper, and better timed than most.',
-    image: 'assets/img/blog-kimana.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/1993_158-11A_Masai_Mara_sunset.jpg',
     body: 'Most safari companies operate out of Nairobi and treat the south as a long drive away. We are based right here in Kimana, minutes from the Amboseli gate, which means our guests spend less time on the road and more time watching elephants. It also means we know which camps are quiet in high season, which routes flood after the rains, and which guides actually grew up on this land.',
   },
   {
     id: 's2', slug: 'reading-amboseli-elephants', title: 'How to Read an Amboseli Elephant Herd', date: '2026-06-02',
     excerpt: 'A short guide to what our guides are actually looking at during a morning game drive.',
-    image: 'assets/img/blog-elephants.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg',
     body: 'Watch the matriarch first — she decides when the herd moves and where. Calves stay tucked between adults, never at the edge. A herd spread wide and relaxed means no danger nearby; a tight, alert cluster means they have sensed something. This is the kind of detail our driver-guides point out on every Amboseli drive.',
   },
   {
     id: 's3', slug: 'build-your-own-safari-explained', title: 'Build-Your-Own Safari, Explained', date: '2026-05-18',
     excerpt: 'Most of our fixed packages exist because guests kept asking for the same combinations — but you can also build your own from scratch.',
-    image: 'assets/img/blog-builder.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Morning_Samburu_National_Reserve_landscape_with_safari_vehicle,_Kenya.jpg',
     body: 'Pick a park or two, choose your stay tier, choose your transport, tell us your travel dates and number of people. We price it live and confirm over WhatsApp. It works exactly like our fixed packages behind the scenes — we are just letting you choose the pieces yourself.',
   },
 ];

@@ -19,7 +19,7 @@ export async function mount(container, { query }){
   };
 
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-build.svg', title: 'Build Your Own Safari', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Build Your Own' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/1993_158-11A_Masai_Mara_sunset.jpg', title: 'Build Your Own Safari', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Build Your Own' }] })}
     <section class="section">
       <div class="container builder">
         <div>

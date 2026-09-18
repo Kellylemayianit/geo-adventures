@@ -10,7 +10,7 @@ export async function mount(container){
   ]);
 
   const hero = renderHero({
-    image: 'assets/img/hero-amboseli.svg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg',
     script: 'Karibu Kimana',
     title: 'Safaris built from the ground up, right here in Kimana',
     text: 'Parks, stays and transport across Amboseli, the Maasai Mara, Tsavo and the wider Rift Valley — take one of our packages, or pick the pieces yourself.',

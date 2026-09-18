@@ -188,6 +188,42 @@ export default {
         return json({ token, user }, 200, env);
       }
 
+      // ---- Self-service password change (requires current password) ----
+      if (path === '/api/auth/change-password' && method === 'POST'){
+        const authUser = await getAuthUser(request, env);
+        if (!authUser) return err('Login required.', 401, env);
+        const { currentPassword, newPassword } = await request.json();
+        if (!currentPassword || !newPassword || newPassword.length < 4){
+          return err('Current password and a new password (4+ characters) are required.', 400, env);
+        }
+        const row = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(authUser.id).first();
+        if (!row) return err('Account not found.', 404, env);
+        const ok = await verifyPassword(currentPassword, row.password_salt, row.password_hash);
+        if (!ok) return err('Current password is incorrect.', 401, env);
+        const { hash, salt } = await hashPassword(newPassword);
+        await env.DB.prepare('UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?').bind(hash, salt, row.id).run();
+        return json({ ok: true }, 200, env);
+      }
+
+      // ---- Admin: list users / reset a user's password by hand (WhatsApp-mediated) ----
+      if (path === '/api/admin/users' && method === 'GET'){
+        const authUser = await getAuthUser(request, env);
+        if (!authUser || authUser.role !== 'admin') return err('Admin only.', 403, env);
+        const { results } = await env.DB.prepare('SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC').all();
+        return json(results, 200, env);
+      }
+      if (path.match(/^\/api\/admin\/users\/[^/]+\/reset-password$/) && method === 'POST'){
+        const authUser = await getAuthUser(request, env);
+        if (!authUser || authUser.role !== 'admin') return err('Admin only.', 403, env);
+        const userId = path.split('/')[4];
+        const { newPassword } = await request.json();
+        if (!newPassword || newPassword.length < 4) return err('New password must be at least 4 characters.', 400, env);
+        const { hash, salt } = await hashPassword(newPassword);
+        const result = await env.DB.prepare('UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?').bind(hash, salt, userId).run();
+        if (!result.meta || result.meta.changes === 0) return err('User not found.', 404, env);
+        return json({ ok: true }, 200, env);
+      }
+
       // ---- Bookings ----
       if (path === '/api/bookings' && method === 'GET'){
         const authUser = await getAuthUser(request, env);

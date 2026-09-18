@@ -8,7 +8,7 @@ export async function mount(container){
   const regions = ['All', ...new Set(destinations.map((d) => d.region))];
 
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-destinations.svg', title: 'Parks & Destinations', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Destinations' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Maasai_Mara_National_Reserve_Kenya.jpg', title: 'Parks & Destinations', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Destinations' }] })}
     <section class="section">
       <div class="container">
         <div class="filter-bar" style="margin-bottom:2rem" id="region-filter">

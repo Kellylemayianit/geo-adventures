@@ -8,7 +8,7 @@ export async function mount(container){
   const classes = ['All', ...new Set(packages.map((p) => p.classLabel))];
 
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-packages.svg', title: 'Safari Packages', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Packages' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Elephants_at_Amboseli_national_park_against_Mount_Kilimanjaro.jpg', title: 'Safari Packages', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Packages' }] })}
     <section class="section">
       <div class="container">
         <div class="flex-between flex-wrap gap-md" style="margin-bottom:1.5rem">

@@ -36,3 +36,9 @@ export const loginRequest = (email, password) =>
   apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
 export const signupRequest = (name, email, password, phone) =>
   apiFetch('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password, phone }) });
+export const changePasswordRequest = (currentPassword, newPassword) =>
+  apiFetch('/api/auth/change-password', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword }) });
+
+export const fetchAdminUsers = () => apiFetch('/api/admin/users');
+export const resetUserPasswordRequest = (userId, newPassword) =>
+  apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/reset-password`, { method: 'POST', body: JSON.stringify({ newPassword }) });

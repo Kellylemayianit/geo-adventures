@@ -1,6 +1,6 @@
 // Real auth against the Worker's /api/auth endpoints. Session (token + user) lives in
 // localStorage via session.js so a page refresh doesn't log people out.
-import { loginRequest, signupRequest } from '../services/api.js';
+import { loginRequest, signupRequest, changePasswordRequest } from '../services/api.js';
 import { getStoredUser, setSession, clearSession } from './session.js';
 
 const listeners = new Set();
@@ -37,6 +37,15 @@ export async function signUp({ name, email, password, phone }){
     setSession(token, user);
     listeners.forEach((fn) => fn(user));
     return { ok: true, user };
+  } catch (e){
+    return { ok: false, error: e.message };
+  }
+}
+
+export async function changePassword(currentPassword, newPassword){
+  try {
+    await changePasswordRequest(currentPassword, newPassword);
+    return { ok: true };
   } catch (e){
     return { ok: false, error: e.message };
   }

@@ -7,7 +7,7 @@ export async function mount(container){
   const team = await getTeam();
 
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-about.svg', title: 'About Geo Adventures Kenya', crumbs: [{ label: 'Home', href: '#/' }, { label: 'About' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Morning_Samburu_National_Reserve_landscape_with_safari_vehicle,_Kenya.jpg', title: 'About Geo Adventures Kenya', crumbs: [{ label: 'Home', href: '#/' }, { label: 'About' }] })}
 
     <section class="section">
       <div class="container grid grid-2" style="align-items:center">
@@ -18,7 +18,7 @@ export async function mount(container){
           <p>What began as arranging trips for friends and returning guests grew into three connected services — access to the parks, connections with hotels from budget to luxury, and our own transport fleet of cars, 4x4s, motorbikes and tuktuks. Put together, that's a safari package. Taken apart, that's a set of tools you can combine your own way.</p>
         </div>
         <div>
-          <img src="assets/img/about-team.svg" alt="Geo Adventures Kenya team in Kimana" style="border-radius:var(--radius-lg)">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Morning_Samburu_National_Reserve_landscape_with_safari_vehicle,_Kenya.jpg" alt="Geo Adventures Kenya team in Kimana" style="border-radius:var(--radius-lg)">
         </div>
       </div>
     </section>
@@ -49,6 +49,12 @@ export async function mount(container){
         <div class="grid grid-4">
           ${team.map(teamCard).join('')}
         </div>
+      </div>
+    </section>
+
+    <section class="section-tight">
+      <div class="container">
+        <p class="muted" style="font-size:.78rem">Park and landscape photography via Wikimedia Commons, used under their respective Creative Commons licenses \u2014 credit: Amoghavarsha JS, Svein-Magne Tunli, Mgiganteus, Syllabub, Timothy A. Gonsalves, and Dan Lundberg.</p>
       </div>
     </section>
   `);

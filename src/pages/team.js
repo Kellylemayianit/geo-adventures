@@ -6,7 +6,7 @@ import { getTeam } from '../services/dataLoader.js';
 export async function mount(container){
   const team = await getTeam();
   render(container, `
-    ${renderPageBanner({ image: 'assets/img/banner-team.svg', title: 'Our Team', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Team' }] })}
+    ${renderPageBanner({ image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Morning_Samburu_National_Reserve_landscape_with_safari_vehicle,_Kenya.jpg', title: 'Our Team', crumbs: [{ label: 'Home', href: '#/' }, { label: 'Team' }] })}
     <section class="section">
       <div class="container">
         <div class="text-center" style="max-width:600px;margin:0 auto 2.5rem">
