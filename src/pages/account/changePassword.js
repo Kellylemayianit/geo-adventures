@@ -1,6 +1,7 @@
-import { render, qs, showToast } from '../utilities/helpers.js';
-import { renderSidebar } from '../components/admin/sidebar.js';
-import { changePassword, currentUser } from '../utilities/auth.js';
+import { render, qs, showToast } from '../../utilities/helpers.js';
+import { renderSidebar } from '../../components/admin/sidebar.js';
+import { passwordField, wirePasswordToggles } from '../../components/passwordField.js';
+import { changePassword, currentUser } from '../../utilities/auth.js';
 
 export async function mount(container){
   const user = currentUser();
@@ -18,18 +19,9 @@ export async function mount(container){
         </div>
         <div class="panel" style="max-width:480px">
           <form id="change-password-form" novalidate>
-            <div class="field-group">
-              <label class="field-label" for="cp-current">Current password</label>
-              <input class="text-field" id="cp-current" name="currentPassword" type="password" required>
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="cp-new">New password</label>
-              <input class="text-field" id="cp-new" name="newPassword" type="password" required minlength="4">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="cp-confirm">Confirm new password</label>
-              <input class="text-field" id="cp-confirm" name="confirmPassword" type="password" required minlength="4">
-            </div>
+            ${passwordField({ id: 'cp-current', name: 'currentPassword', label: 'Current password' })}
+            ${passwordField({ id: 'cp-new', name: 'newPassword', label: 'New password', minlength: 4 })}
+            ${passwordField({ id: 'cp-confirm', name: 'confirmPassword', label: 'Confirm new password', minlength: 4 })}
             <button class="btn btn-primary" type="submit">Update Password</button>
           </form>
           <p class="muted" style="font-size:.85rem;margin-top:1.2rem">Forgotten your password entirely and can't log in? Message us on WhatsApp from the Contact page and we'll reset it for you.</p>
@@ -39,6 +31,7 @@ export async function mount(container){
   `);
 
   renderSidebar(qs('#dash-sidebar-mount', container), { role, active: '#/account/password' });
+  wirePasswordToggles(container);
 
   qs('#change-password-form', container).addEventListener('submit', async (e) => {
     e.preventDefault();

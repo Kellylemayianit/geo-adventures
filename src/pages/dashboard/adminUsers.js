@@ -1,6 +1,7 @@
 import { render, qs, qsa, formatDate, showToast, openModal, closeModal } from '../../utilities/helpers.js';
 import { renderSidebar } from '../../components/admin/sidebar.js';
 import { dataTable } from '../../components/admin/table.js';
+import { passwordField, wirePasswordToggles } from '../../components/passwordField.js';
 import { fetchAdminUsers, resetUserPasswordRequest } from '../../services/api.js';
 
 export async function mount(container){
@@ -48,17 +49,15 @@ export async function mount(container){
   }
 
   function openResetModal(userId, name){
-    openModal(`
+    const modalRoot = openModal(`
       <h4>Reset password for ${name}</h4>
       <p class="muted" style="font-size:.88rem">Set a temporary password, then tell them the new one over WhatsApp or a call.</p>
       <form id="reset-pw-form" novalidate>
-        <div class="field-group">
-          <label class="field-label" for="rp-new">New password</label>
-          <input class="text-field" id="rp-new" name="newPassword" type="text" minlength="4" required>
-        </div>
+        ${passwordField({ id: 'rp-new', name: 'newPassword', label: 'New password', minlength: 4 })}
         <button class="btn btn-primary btn-block" type="submit">Set New Password</button>
       </form>
     `);
+    wirePasswordToggles(modalRoot);
     qs('#reset-pw-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);

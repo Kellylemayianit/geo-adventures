@@ -2,6 +2,7 @@ import { qs, qsa } from '../utilities/helpers.js';
 import { icon } from '../utilities/icons.js';
 import { CONTACT, telLink, mailtoLink } from '../utilities/channelLinks.js';
 import { currentUser, signOut } from '../utilities/auth.js';
+import { resolvedTheme, toggleTheme } from '../utilities/theme.js';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '#/' },
@@ -73,6 +74,7 @@ export function renderHeader(root, activeRoute = ''){
           <ul>${navHtml}</ul>
         </nav>
         <div class="nav-actions">
+          <button class="icon-btn" id="btn-theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">${icon(resolvedTheme() === 'dark' ? 'sun' : 'moon')}</button>
           ${authHtml}
           <a class="btn btn-amber btn-sm" href="#/build">Build a Safari</a>
         </div>
@@ -108,6 +110,11 @@ function wireHeader(root){
   qs('#btn-logout', root)?.addEventListener('click', () => {
     signOut();
     window.location.hash = '#/';
+  });
+
+  qs('#btn-theme-toggle', root)?.addEventListener('click', (e) => {
+    const next = toggleTheme();
+    e.currentTarget.innerHTML = icon(next === 'dark' ? 'sun' : 'moon');
   });
 
   if (!globalListenersAttached){

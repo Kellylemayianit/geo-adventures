@@ -40,6 +40,14 @@
 <main id="app-main"></main>
 <div id="app-footer"></div>
 
+<script>
+  // Applied inline, before app.js loads, so there's no flash of the wrong theme on first paint.
+  (function(){
+    var stored = localStorage.getItem('gak_theme');
+    var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 <script type="module" src="src/app.js"></script>
 </body>
 </html>

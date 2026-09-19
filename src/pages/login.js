@@ -1,4 +1,5 @@
 import { render, qs, showToast } from '../utilities/helpers.js';
+import { passwordField, wirePasswordToggles } from '../components/passwordField.js';
 import { signIn } from '../utilities/auth.js';
 import { navigate } from '../router.js';
 
@@ -13,10 +14,7 @@ export async function mount(container){
             <label class="field-label" for="li-email">Email</label>
             <input class="text-field" id="li-email" name="email" type="email" required>
           </div>
-          <div class="field-group">
-            <label class="field-label" for="li-password">Password</label>
-            <input class="text-field" id="li-password" name="password" type="password" required>
-          </div>
+          ${passwordField({ id: 'li-password', name: 'password', label: 'Password' })}
           <button class="btn btn-primary btn-block" type="submit">Log In</button>
         </form>
         <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
@@ -24,6 +22,8 @@ export async function mount(container){
       </div>
     </section>
   `);
+
+  wirePasswordToggles(container);
 
   qs('#login-form', container).addEventListener('submit', async (e) => {
     e.preventDefault();

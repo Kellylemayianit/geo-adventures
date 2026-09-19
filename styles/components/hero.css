@@ -14,7 +14,7 @@
 .hero-stats div span{font-size:var(--fs-12);color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;}
 
 .hero-search{
-  margin-top:2.4rem;background:#fff;border-radius:var(--radius-md);
+  margin-top:2.4rem;background:var(--paper);border-radius:var(--radius-md);
   box-shadow:var(--shadow);padding:1.1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;
 }
 .hero-search .field-label{color:var(--ink-500);font-size:var(--fs-12);margin-bottom:.25rem;}

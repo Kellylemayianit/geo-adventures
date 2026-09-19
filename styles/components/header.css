@@ -10,7 +10,7 @@
 
 .site-header{
   position:sticky;top:0;z-index:60;
-  background:#fff;border-bottom:1px solid var(--line);
+  background:var(--paper);border-bottom:1px solid var(--line);
 }
 .site-header .container{
   display:flex;align-items:center;justify-content:space-between;
@@ -39,7 +39,7 @@
 .has-dropdown.is-open > .nav-link::after{transform:rotate(-135deg);margin-top:3px;}
 .dropdown-menu{
   display:none;position:absolute;top:100%;left:0;min-width:190px;
-  background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);
+  background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);
   padding:.4rem 0;z-index:70;
 }
 .dropdown-menu a{display:block;padding:.6rem 1.1rem;font-size:var(--fs-14);color:var(--ink-700);}
@@ -72,7 +72,7 @@
   /* Full-viewport overlay menu, independent of topbar/header heights, so it can never misalign. */
   .main-nav{
     position:fixed;inset:0;left:0;right:0;
-    background:#fff;flex-direction:column;align-items:stretch;
+    background:var(--paper);flex-direction:column;align-items:stretch;
     transform:translateX(-100%);transition:transform .25s ease;
     overflow-y:auto;padding:calc(var(--topbar-h) + var(--header-h) + 1rem) 1.25rem 2rem;
     z-index:80;

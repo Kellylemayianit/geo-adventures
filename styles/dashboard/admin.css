@@ -1,4 +1,4 @@
-.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:1.5rem;margin-bottom:1.5rem;}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:1.5rem;margin-bottom:1.5rem;}
 .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:.6rem;}
 .panel-head h4{margin:0;}
 
@@ -11,7 +11,7 @@ table.data-table{width:100%;border-collapse:collapse;font-size:var(--fs-14);}
 .data-table td{padding:.85rem .9rem;border-bottom:1px solid var(--line);vertical-align:middle;}
 .data-table tr:last-child td{border-bottom:0;}
 .row-actions{display:flex;gap:.5rem;}
-.row-actions button{border:1px solid var(--line);background:#fff;border-radius:var(--radius-sm);padding:.35rem .6rem;font-size:var(--fs-12);}
+.row-actions button{border:1px solid var(--line);background:var(--paper);border-radius:var(--radius-sm);padding:.35rem .6rem;font-size:var(--fs-12);}
 .row-actions button:hover{border-color:var(--green-600);color:var(--green-700);}
 
 .status-badge{padding:.25rem .6rem;border-radius:999px;font-size:var(--fs-12);font-weight:700;}
@@ -27,10 +27,10 @@ table.data-table{width:100%;border-collapse:collapse;font-size:var(--fs-14);}
   min-height:calc(100vh - var(--header-h) - var(--topbar-h));
   display:flex;align-items:center;justify-content:center;background:var(--paper-dim);padding:2.5rem 1rem;
 }
-.auth-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:2.25rem;max-width:420px;width:100%;box-shadow:var(--shadow);}
+.auth-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:2.25rem;max-width:420px;width:100%;box-shadow:var(--shadow);}
 .auth-card h3{text-align:center;}
 .auth-switch{text-align:center;margin-top:1rem;font-size:var(--fs-14);}
 .auth-switch a{color:var(--green-700);font-weight:700;}
 .auth-tabs{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:1.5rem;}
-.auth-tabs button{flex:1;border:0;background:#fff;padding:.65rem;font-weight:700;font-size:var(--fs-14);color:var(--ink-500);}
+.auth-tabs button{flex:1;border:0;background:var(--paper);padding:.65rem;font-weight:700;font-size:var(--fs-14);color:var(--ink-500);}
 .auth-tabs button[aria-pressed="true"]{background:var(--green-600);color:#fff;}

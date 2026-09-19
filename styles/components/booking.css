@@ -21,7 +21,7 @@
 }
 .option-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;margin-top:1rem;}
 .option-card{
-  border:2px solid var(--line);border-radius:var(--radius-sm);padding:.9rem;text-align:left;background:#fff;cursor:pointer;
+  border:2px solid var(--line);border-radius:var(--radius-sm);padding:.9rem;text-align:left;background:var(--paper);cursor:pointer;
 }
 .option-card.is-selected{border-color:var(--green-600);background:var(--green-50);}
 .option-card strong{display:block;font-size:var(--fs-14);color:var(--ink-900);}
