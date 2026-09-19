@@ -1,9 +1,32 @@
-import { qs } from '../utilities/helpers.js';
+import { qs, qsa } from '../utilities/helpers.js';
 import { formatMoney, showToast } from '../utilities/helpers.js';
 import { validateBookingFields } from '../utilities/booking.js';
 import { waLink, buildEnquiryMessage } from '../utilities/channelLinks.js';
 import { createBooking } from '../services/dataLoader.js';
 import { currentUser } from '../utilities/auth.js';
+
+function childFieldsHtml(count){
+  if (!count) return '';
+  const rows = Array.from({ length: count }).map((_, i) => `
+    <div class="grid grid-2" style="margin-bottom:.6rem">
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label" for="bf-child-name-${i}">Child ${i + 1} name</label>
+        <input class="text-field" id="bf-child-name-${i}" name="child_name_${i}" required>
+      </div>
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label" for="bf-child-age-${i}">Age</label>
+        <input class="text-field" id="bf-child-age-${i}" name="child_age_${i}" type="number" min="0" max="17" required>
+      </div>
+    </div>
+  `).join('');
+  return `
+    <div class="field-group" id="booking-children-fields">
+      <label class="field-label">Children on this trip</label>
+      <p class="muted" style="font-size:.8rem;margin-top:-.2rem;margin-bottom:.7rem">Some camps have age-specific rules, so we ask for each child's name and age.</p>
+      ${rows}
+    </div>
+  `;
+}
 
 /**
  * Renders the sticky booking panel used on package detail + build-your-own pages.
@@ -12,8 +35,9 @@ import { currentUser } from '../utilities/auth.js';
  * @param {number} opts.total          total price in KES
  * @param {Array}  opts.lines          [{label, value}] priced breakdown lines
  * @param {string} opts.ctaLabel
+ * @param {number} [opts.childrenCount] how many of the travellers are children - renders a name+age field per child
  */
-export function renderBookingPanel({ title, total, lines = [], ctaLabel = 'Request to Book' }){
+export function renderBookingPanel({ title, total, lines = [], ctaLabel = 'Request to Book', childrenCount = 0 }){
   const user = currentUser();
   return `
     <div class="booking-panel" id="booking-panel">
@@ -44,6 +68,7 @@ export function renderBookingPanel({ title, total, lines = [], ctaLabel = 'Reque
           <input class="text-field" id="bf-date" name="date" type="date" required>
           <span class="field-error" data-error-for="date" hidden></span>
         </div>
+        ${childFieldsHtml(childrenCount)}
         <button class="btn btn-primary btn-block" type="submit">${ctaLabel}</button>
         <p class="muted" style="font-size:.8rem;margin-top:.8rem">We confirm every booking over WhatsApp or phone before anything is finalised.</p>
       </form>
@@ -55,8 +80,9 @@ export function renderBookingPanel({ title, total, lines = [], ctaLabel = 'Reque
  * Wires the booking form's submit handler.
  * @param {HTMLElement} root
  * @param {Function} getBookingPayload  () => object describing the booking (excluding contact fields)
+ * @param {number} [childrenCount] must match what renderBookingPanel was called with, so submit reads the right fields
  */
-export function wireBookingForm(root, getBookingPayload){
+export function wireBookingForm(root, getBookingPayload, childrenCount = 0){
   const form = qs('#booking-form', root);
   if (!form) return;
 
@@ -76,6 +102,11 @@ export function wireBookingForm(root, getBookingPayload){
       return;
     }
 
+    const childrenDetails = Array.from({ length: childrenCount }).map((_, i) => ({
+      name: fields[`child_name_${i}`] || '',
+      age: fields[`child_age_${i}`] || '',
+    }));
+
     const payload = getBookingPayload();
     const user = currentUser();
     const booking = {
@@ -85,16 +116,21 @@ export function wireBookingForm(root, getBookingPayload){
       phone: fields.phone,
       email: fields.email || '',
       date: fields.date,
+      children: childrenCount,
+      childrenDetails,
       status: 'pending',
       createdAt: new Date().toISOString(),
       ...payload,
     };
     await createBooking(booking);
 
+    const childrenLine = childrenCount
+      ? `\nChildren: ${childrenDetails.map((c) => `${c.name} (age ${c.age})`).join(', ')}`
+      : '';
     const message = buildEnquiryMessage({
       title: payload.title,
       kind: payload.type,
-      details: `Traveller: ${fields.name} (${fields.phone})\nDate: ${fields.date}\nTotal: ${formatMoney(payload.totalKes)}`,
+      details: `Traveller: ${fields.name} (${fields.phone})\nDate: ${fields.date}\nTotal: ${formatMoney(payload.totalKes)}${childrenLine}`,
     });
     showToast('Booking request saved — opening WhatsApp to confirm.', 'success');
     window.open(waLink(message), '_blank');

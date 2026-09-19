@@ -8,7 +8,8 @@
 .booking-line{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px dashed var(--line);font-size:var(--fs-14);}
 .booking-line.total{border-bottom:0;font-weight:800;color:var(--ink-900);padding-top:.8rem;}
 
-.builder{display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start;}
+.builder{display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start;min-width:0;}
+.builder > *{min-width:0;}
 @media (max-width:960px){.builder{grid-template-columns:1fr;}}
 
 .builder-step{

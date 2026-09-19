@@ -35,11 +35,19 @@ const headerEl = qs('#app-header');
 const mainEl = qs('#app-main');
 const footerEl = qs('#app-footer');
 
+// Guards against a race where two navigations overlap (e.g. rapid A -> B -> A clicks) and
+// an older, slower-resolving dispatch overwrites a newer one's content after the fact.
+let navToken = 0;
+
 async function dispatch({ path, query, matched }){
+  const myToken = ++navToken;
+  const stillCurrent = () => myToken === navToken;
+
   if (!matched){
     renderHeader(headerEl, resolveActiveNav(path));
     footerEl.hidden = false;
     const notFound = await import('./pages/notFound.js');
+    if (!stillCurrent()) return;
     notFound.mount(mainEl, { params: {}, query });
     renderFooter(footerEl);
     window.scrollTo(0, 0);
@@ -72,14 +80,34 @@ async function dispatch({ path, query, matched }){
   // Only show a loading placeholder if the page genuinely takes a moment - on fast
   // transitions (cached module + cached data) this avoids a visible flash on every click.
   const loadingTimer = setTimeout(() => {
-    mainEl.innerHTML = '<div class="section-tight container"><p class="muted">Loading…</p></div>';
+    if (stillCurrent()) mainEl.innerHTML = '<div class="section-tight container"><p class="muted">Loading…</p></div>';
   }, 200);
 
-  const mod = await route.load();
-  await mod.mount(mainEl, { params, query });
-  clearTimeout(loadingTimer);
-  if (!isAppArea) renderFooter(footerEl);
-  window.scrollTo(0, 0);
+  try {
+    const mod = await route.load();
+    if (!stillCurrent()) return; // a newer navigation started while this one was loading - drop it
+    await mod.mount(mainEl, { params, query });
+    if (!stillCurrent()) return;
+    if (!isAppArea) renderFooter(footerEl);
+    window.scrollTo(0, 0);
+  } catch (e){
+    if (!stillCurrent()) return;
+    console.error('Page failed to load:', e);
+    mainEl.innerHTML = `
+      <div class="section-tight container text-center">
+        <h3>Something went wrong loading this page</h3>
+        <p class="muted">Please try again, or head back home.</p>
+        <div class="flex gap-sm flex-center" style="margin-top:1rem">
+          <button class="btn btn-primary" id="retry-nav">Retry</button>
+          <a class="btn btn-outline" href="#/">Go Home</a>
+        </div>
+      </div>
+    `;
+    qs('#retry-nav', mainEl)?.addEventListener('click', () => dispatch({ path, query, matched }));
+    if (!isAppArea) renderFooter(footerEl);
+  } finally {
+    clearTimeout(loadingTimer);
+  }
 }
 
 function resolveActiveNav(path){

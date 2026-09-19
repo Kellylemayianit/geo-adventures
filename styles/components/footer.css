@@ -1,5 +1,6 @@
 .site-footer{background:var(--ink-900);color:rgba(255,255,255,.75);}
-.footer-top{padding:4rem 0 2.5rem;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:2rem;}
+.footer-top{padding:4rem 0 2.5rem;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:2rem;min-width:0;}
+.footer-top > *{min-width:0;}
 .footer-brand .brand{color:#fff;}
 .footer-brand p{color:rgba(255,255,255,.65);margin-top:1rem;font-size:var(--fs-14);}
 .site-footer h5{color:#fff;font-size:var(--fs-16);margin-bottom:1rem;}

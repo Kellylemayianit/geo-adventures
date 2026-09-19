@@ -1,4 +1,5 @@
-.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.75rem;}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.75rem;min-width:0;}
+.stat-cards > *{min-width:0;}
 .stat-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:1.3rem;}
 .stat-card span.label{font-size:var(--fs-12);color:var(--ink-500);text-transform:uppercase;letter-spacing:.05em;}
 .stat-card strong{display:block;font-family:var(--font-display);font-size:1.7rem;color:var(--ink-900);margin:.3rem 0;}

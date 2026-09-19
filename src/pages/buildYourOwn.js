@@ -16,6 +16,7 @@ export async function mount(container, { query }){
     transportId: '4x4',
     travelers: 2,
     days: 3,
+    children: 0,
   };
 
   render(container, `
@@ -62,11 +63,17 @@ export async function mount(container, { query }){
 
           <div class="builder-step">
             <h4><span class="step-no">4</span> Travellers &amp; days</h4>
-            <div class="grid grid-2" style="margin-top:1rem;max-width:420px">
+            <div class="grid grid-3" style="margin-top:1rem;max-width:560px">
               <div class="field-group">
                 <label class="field-label">Travellers</label>
                 <span class="qty-stepper" id="qty-travelers">
                   <button type="button" data-step="-1">−</button><span>${state.travelers}</span><button type="button" data-step="1">+</button>
+                </span>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Of which, children</label>
+                <span class="qty-stepper" id="qty-children">
+                  <button type="button" data-step="-1">−</button><span>${state.children}</span><button type="button" data-step="1">+</button>
                 </span>
               </div>
               <div class="field-group">
@@ -104,6 +111,7 @@ export async function mount(container, { query }){
         { label: `Transport (${pricing.vehiclesNeeded} vehicle${pricing.vehiclesNeeded === 1 ? '' : 's'})`, value: formatMoney(pricing.transportCost) },
       ],
       ctaLabel: 'Request This Custom Safari',
+      childrenCount: state.children,
     });
     wireBookingForm(panelMount, () => ({
       type: 'custom',
@@ -114,7 +122,7 @@ export async function mount(container, { query }){
       travelers: state.travelers,
       days: state.days,
       totalKes: pricing.total,
-    }));
+    }), state.children);
   }
 
   function syncOptionCards(){
@@ -162,7 +170,17 @@ export async function mount(container, { query }){
     const btn = e.target.closest('button[data-step]');
     if (!btn) return;
     state.travelers = Math.max(1, state.travelers + Number(btn.dataset.step));
+    if (state.children > state.travelers) state.children = state.travelers;
     qs('#qty-travelers span', container).textContent = state.travelers;
+    qs('#qty-children span', container).textContent = state.children;
+    refreshPanel();
+  });
+
+  qs('#qty-children', container).addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-step]');
+    if (!btn) return;
+    state.children = Math.min(state.travelers, Math.max(0, state.children + Number(btn.dataset.step)));
+    qs('#qty-children span', container).textContent = state.children;
     refreshPanel();
   });
 

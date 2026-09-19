@@ -28,12 +28,15 @@ export async function mount(container){
     panel.innerHTML = `
       <div class="panel-head"><h4>All booking requests (${bookings.length})</h4></div>
       ${dataTable({
-        columns: ['Trip', 'Traveller', 'Phone', 'Date', 'Total', 'Status', 'Actions'],
+        columns: ['Trip', 'Traveller', 'Phone', 'Date', 'Children', 'Total', 'Status', 'Actions'],
         rows: bookings.map((b) => [
           b.title,
           b.name,
           b.phone,
           formatDate(b.date),
+          b.children
+            ? `<span title="${(b.childrenDetails || []).map((c) => `${c.name} (age ${c.age})`).join(', ')}">${b.children} \u2014 ${(b.childrenDetails || []).map((c) => `${c.name} (${c.age})`).join(', ') || 'details pending'}</span>`
+            : '\u2014',
           formatMoney(b.totalKes),
           statusBadge(b.status),
           `<div class="row-actions">

@@ -30,7 +30,7 @@
   background:var(--green-50);color:var(--green-700);
   font-size:var(--fs-12);font-weight:700;border:1px solid var(--line-soft);
 }
-.pill-amber{background:#fff3e2;color:var(--amber-800);border-color:#ffe1b3;}
+.pill-amber{background:var(--amber-tint-bg);color:var(--amber-800);border-color:var(--amber-tint-border);}
 
 .filter-bar{
   display:flex;flex-wrap:wrap;gap:.6rem;

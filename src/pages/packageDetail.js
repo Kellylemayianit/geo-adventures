@@ -17,6 +17,7 @@ export async function mount(container, { params }){
   const transport = allTransport.find((t) => t.id === pkg.transportId);
 
   let travelers = 2;
+  let children = 0;
 
   function panelHtml(){
     const total = computePackagePrice(pkg, travelers);
@@ -28,7 +29,31 @@ export async function mount(container, { params }){
         { label: 'Travellers', value: `<span id="pd-qty-display">${travelers}</span>` },
       ],
       ctaLabel: 'Request to Book This Package',
+      childrenCount: children,
     });
+  }
+
+  function stepperRow(){
+    return `
+      <div class="grid grid-2" style="margin-top:1rem;padding:0 1.75rem">
+        <div>
+          <span class="field-label" style="margin:0 0 .3rem;display:block">Travellers</span>
+          <span class="qty-stepper" id="pd-qty">
+            <button type="button" data-step="-1" aria-label="Decrease travellers">−</button>
+            <span>${travelers}</span>
+            <button type="button" data-step="1" aria-label="Increase travellers">+</button>
+          </span>
+        </div>
+        <div>
+          <span class="field-label" style="margin:0 0 .3rem;display:block">Of which, children</span>
+          <span class="qty-stepper" id="pd-qty-children">
+            <button type="button" data-step="-1" aria-label="Decrease children">−</button>
+            <span>${children}</span>
+            <button type="button" data-step="1" aria-label="Increase children">+</button>
+          </span>
+        </div>
+      </div>
+    `;
   }
 
   render(container, `
@@ -64,14 +89,7 @@ export async function mount(container, { params }){
 
         <div id="booking-panel-mount">
           ${panelHtml()}
-          <div class="flex-between" style="margin-top:1rem;padding:0 1.75rem">
-            <span class="field-label" style="margin:0">Travellers</span>
-            <span class="qty-stepper" id="pd-qty">
-              <button type="button" data-step="-1" aria-label="Decrease">−</button>
-              <span>${travelers}</span>
-              <button type="button" data-step="1" aria-label="Increase">+</button>
-            </span>
-          </div>
+          ${stepperRow()}
         </div>
       </div>
     </section>
@@ -80,16 +98,7 @@ export async function mount(container, { params }){
   const mount_ = qs('#booking-panel-mount', container);
 
   function refreshPanel(){
-    mount_.innerHTML = panelHtml() + `
-      <div class="flex-between" style="margin-top:1rem;padding:0 1.75rem">
-        <span class="field-label" style="margin:0">Travellers</span>
-        <span class="qty-stepper" id="pd-qty">
-          <button type="button" data-step="-1" aria-label="Decrease">−</button>
-          <span>${travelers}</span>
-          <button type="button" data-step="1" aria-label="Increase">+</button>
-        </span>
-      </div>
-    `;
+    mount_.innerHTML = panelHtml() + stepperRow();
     wireStepper();
     wireBookingForm(mount_, () => ({
       type: 'package',
@@ -97,7 +106,7 @@ export async function mount(container, { params }){
       title: pkg.title,
       travelers,
       totalKes: computePackagePrice(pkg, travelers),
-    }));
+    }), children);
   }
 
   function wireStepper(){
@@ -105,6 +114,13 @@ export async function mount(container, { params }){
       const btn = e.target.closest('button[data-step]');
       if (!btn) return;
       travelers = Math.max(1, travelers + Number(btn.dataset.step));
+      if (children > travelers) children = travelers;
+      refreshPanel();
+    });
+    qs('#pd-qty-children', mount_)?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-step]');
+      if (!btn) return;
+      children = Math.min(travelers, Math.max(0, children + Number(btn.dataset.step)));
       refreshPanel();
     });
   }
@@ -116,5 +132,5 @@ export async function mount(container, { params }){
     title: pkg.title,
     travelers,
     totalKes: computePackagePrice(pkg, travelers),
-  }));
+  }), children);
 }
