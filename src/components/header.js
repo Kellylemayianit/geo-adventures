@@ -44,7 +44,7 @@ export function renderHeader(root, activeRoute = ''){
 
   const authHtml = user
     ? `
-      <a class="user-chip" href="${user.role === 'admin' ? '#/admin' : '#/dashboard'}">
+      <a class="user-chip" href="${(user.role === 'admin' || user.role === 'moderator') ? '#/admin' : '#/dashboard'}">
         <span class="avatar">${user.name.charAt(0).toUpperCase()}</span> ${user.name.split(' ')[0]}
       </a>
       <button class="icon-btn" id="btn-logout" title="Log out" aria-label="Log out">${icon('logout')}</button>`

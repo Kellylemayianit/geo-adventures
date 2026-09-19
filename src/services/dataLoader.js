@@ -6,7 +6,12 @@ import * as api from './api.js';
 const cache = {};
 
 async function cached(key, loader){
-  if (!cache[key]) cache[key] = await loader();
+  if (!cache[key]){
+    cache[key] = Promise.resolve().then(loader).catch((e) => {
+      delete cache[key];
+      throw e;
+    });
+  }
   return cache[key];
 }
 

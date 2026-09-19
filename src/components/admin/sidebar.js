@@ -20,14 +20,16 @@ const ADMIN_LINKS = [
 
 export function renderSidebar(root, { role, active }){
   const user = currentUser();
-  const links = role === 'admin' ? ADMIN_LINKS : CLIENT_LINKS;
+  const staff = user?.role === 'admin' || user?.role === 'moderator' || role === 'admin' || role === 'staff';
+  const links = staff ? ADMIN_LINKS : CLIENT_LINKS;
+  const roleLabel = user?.role === 'admin' ? 'Administrator' : user?.role === 'moderator' ? 'Moderator' : 'Client';
   const html = `
     <aside class="dash-sidebar">
       <div class="dash-user">
         <span class="avatar">${(user?.name || '?').charAt(0).toUpperCase()}</span>
         <div>
           <strong>${user?.name || 'Guest'}</strong>
-          <span>${role === 'admin' ? 'Administrator' : 'Client'}</span>
+          <span>${roleLabel}</span>
         </div>
       </div>
       <nav class="dash-nav">

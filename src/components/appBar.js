@@ -8,8 +8,8 @@ export function renderAppBar(root){
   root.innerHTML = `
     <header class="app-bar">
       <div class="app-bar-inner">
-        <a class="brand" href="${user?.role === 'admin' ? '#/admin' : '#/dashboard'}" style="font-size:1.1rem">
-          <span class="brand-mark">Geo</span> Adventures <span class="brand-sub">${user?.role === 'admin' ? 'Admin' : 'Account'}</span>
+        <a class="brand" href="${(user?.role === 'admin' || user?.role === 'moderator') ? '#/admin' : '#/dashboard'}" style="font-size:1.1rem">
+          <span class="brand-mark">Geo</span> Adventures <span class="brand-sub">${user?.role === 'admin' ? 'Admin' : user?.role === 'moderator' ? 'Staff' : 'Account'}</span>
         </a>
         <div class="app-bar-actions">
           <button class="icon-btn" id="app-bar-theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">${icon(resolvedTheme() === 'dark' ? 'sun' : 'moon')}</button>

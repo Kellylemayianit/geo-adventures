@@ -4,12 +4,29 @@ import { getToken } from '../utilities/session.js';
 // The one seam that talks to the network. Every function here matches the shape it had when
 // it read from mockData.js, so dataLoader.js and every page/component needed zero changes.
 
+const FETCH_MS = 12000;
+
 export async function apiFetch(path, options = {}){
   const token = getToken();
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), FETCH_MS);
+  if (options.signal){
+    if (options.signal.aborted) timeout.abort();
+    else options.signal.addEventListener('abort', () => timeout.abort(), { once: true });
+  }
+
+  let res;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, signal: timeout.signal });
+  } catch (e){
+    if (e.name === 'AbortError') throw new Error('That request took too long. Check your connection and retry.');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
   let data = null;
   try { data = await res.json(); } catch { /* empty body */ }
   if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
@@ -42,3 +59,5 @@ export const changePasswordRequest = (currentPassword, newPassword) =>
 export const fetchAdminUsers = () => apiFetch('/api/admin/users');
 export const resetUserPasswordRequest = (userId, newPassword) =>
   apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/reset-password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
+export const setUserRoleRequest = (userId, role) =>
+  apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });

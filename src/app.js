@@ -3,7 +3,8 @@ import { renderHeader } from './components/header.js';
 import { renderFooter } from './components/footer.js';
 import { renderAppBar } from './components/appBar.js';
 import { qs, showToast } from './utilities/helpers.js';
-import { isLoggedIn, isAdmin } from './utilities/auth.js';
+import { isLoggedIn, isAdmin, isStaff, onAuthChange } from './utilities/auth.js';
+import { clearViewCache, ensureView, hideLoading, peekView, showLoading } from './runtime/spa.js';
 
 const ROUTES = [
   { path: '/', load: () => import('./pages/home.js') },
@@ -21,11 +22,11 @@ const ROUTES = [
   { path: '/signup', load: () => import('./pages/signup.js') },
   { path: '/dashboard', load: () => import('./pages/dashboard/clientDashboard.js'), auth: 'client' },
   { path: '/account/password', load: () => import('./pages/account/changePassword.js'), auth: 'client' },
-  { path: '/admin', load: () => import('./pages/dashboard/adminDashboard.js'), auth: 'admin' },
-  { path: '/admin/bookings', load: () => import('./pages/dashboard/adminBookings.js'), auth: 'admin' },
-  { path: '/admin/packages', load: () => import('./pages/dashboard/adminPackages.js'), auth: 'admin' },
-  { path: '/admin/destinations', load: () => import('./pages/dashboard/adminDestinations.js'), auth: 'admin' },
-  { path: '/admin/users', load: () => import('./pages/dashboard/adminUsers.js'), auth: 'admin' },
+  { path: '/admin', load: () => import('./pages/dashboard/adminDashboard.js'), auth: 'staff' },
+  { path: '/admin/bookings', load: () => import('./pages/dashboard/adminBookings.js'), auth: 'staff' },
+  { path: '/admin/packages', load: () => import('./pages/dashboard/adminPackages.js'), auth: 'staff' },
+  { path: '/admin/destinations', load: () => import('./pages/dashboard/adminDestinations.js'), auth: 'staff' },
+  { path: '/admin/users', load: () => import('./pages/dashboard/adminUsers.js'), auth: 'staff' },
   { path: '/404', load: () => import('./pages/notFound.js') },
 ];
 
@@ -35,30 +36,42 @@ const headerEl = qs('#app-header');
 const mainEl = qs('#app-main');
 const footerEl = qs('#app-footer');
 
-// Guards against a race where two navigations overlap (e.g. rapid A -> B -> A clicks) and
-// an older, slower-resolving dispatch overwrites a newer one's content after the fact.
 let navToken = 0;
+
+onAuthChange(() => clearViewCache());
 
 async function dispatch({ path, query, matched }){
   const myToken = ++navToken;
   const stillCurrent = () => myToken === navToken;
+  const viewKey = viewKeyFor(path, query);
 
   if (!matched){
-    renderHeader(headerEl, resolveActiveNav(path));
-    footerEl.hidden = false;
-    const notFound = await import('./pages/notFound.js');
-    if (!stillCurrent()) return;
-    notFound.mount(mainEl, { params: {}, query });
-    renderFooter(footerEl);
+    applyPublicShell(path);
+    try {
+      await ensureView({
+        key: '/404',
+        mainEl,
+        load: () => import('./pages/notFound.js'),
+        mountArgs: { params: {}, query },
+        stillCurrent,
+      });
+    } catch (e){
+      if (stillCurrent()) paintError(e, { path, query, matched });
+    }
     window.scrollTo(0, 0);
     return;
   }
 
   const { route, params } = matched;
-  const isAppArea = !!route.auth; // dashboard/admin/account routes get their own shell, not the public site nav
+  const isAppArea = !!route.auth;
 
   if (route.auth === 'client' && !isLoggedIn()){
     showToast('Please log in to view that page.', 'error');
+    navigate('#/login');
+    return;
+  }
+  if (route.auth === 'staff' && !isStaff()){
+    showToast('That page is for staff only.', 'error');
     navigate('#/login');
     return;
   }
@@ -73,41 +86,70 @@ async function dispatch({ path, query, matched }){
     footerEl.hidden = true;
     footerEl.innerHTML = '';
   } else {
-    renderHeader(headerEl, resolveActiveNav(path));
-    footerEl.hidden = false;
+    applyPublicShell(path);
   }
 
-  // Only show a loading placeholder if the page genuinely takes a moment - on fast
-  // transitions (cached module + cached data) this avoids a visible flash on every click.
   const loadingTimer = setTimeout(() => {
-    if (stillCurrent()) mainEl.innerHTML = '<div class="section-tight container"><p class="muted">Loading…</p></div>';
-  }, 200);
+    if (stillCurrent() && !peekView(viewKey)) showLoading(mainEl);
+  }, 120);
 
   try {
-    const mod = await route.load();
-    if (!stillCurrent()) return; // a newer navigation started while this one was loading - drop it
-    await mod.mount(mainEl, { params, query });
+    await ensureView({
+      key: viewKey,
+      mainEl,
+      load: route.load,
+      mountArgs: { params, query },
+      stillCurrent,
+    });
     if (!stillCurrent()) return;
     if (!isAppArea) renderFooter(footerEl);
     window.scrollTo(0, 0);
   } catch (e){
     if (!stillCurrent()) return;
-    console.error('Page failed to load:', e);
-    mainEl.innerHTML = `
-      <div class="section-tight container text-center">
-        <h3>Something went wrong loading this page</h3>
-        <p class="muted">Please try again, or head back home.</p>
-        <div class="flex gap-sm flex-center" style="margin-top:1rem">
-          <button class="btn btn-primary" id="retry-nav">Retry</button>
-          <a class="btn btn-outline" href="#/">Go Home</a>
-        </div>
-      </div>
-    `;
-    qs('#retry-nav', mainEl)?.addEventListener('click', () => dispatch({ path, query, matched }));
+    paintError(e, { path, query, matched });
     if (!isAppArea) renderFooter(footerEl);
   } finally {
     clearTimeout(loadingTimer);
+    if (stillCurrent()) hideLoading(mainEl);
   }
+}
+
+function applyPublicShell(path){
+  renderHeader(headerEl, resolveActiveNav(path));
+  footerEl.hidden = false;
+}
+
+function viewKeyFor(path, query){
+  const keys = Object.keys(query || {});
+  if (!keys.length) return path;
+  const qsStr = keys.sort().map((k) => `${k}=${query[k]}`).join('&');
+  return `${path}?${qsStr}`;
+}
+
+function paintError(e, nav){
+  console.error('Page failed to load:', e);
+  hideLoading(mainEl);
+  let host = mainEl.querySelector('.nav-error');
+  if (!host){
+    host = document.createElement('div');
+    host.className = 'nav-error page-host';
+    mainEl.appendChild(host);
+  }
+  for (const child of mainEl.children){
+    if (child.classList.contains('page-host') && child !== host) child.hidden = true;
+  }
+  host.hidden = false;
+  host.innerHTML = `
+    <div class="section-tight container text-center">
+      <h3>Something went wrong loading this page</h3>
+      <p class="muted">${e?.message || 'Please try again, or head back home.'}</p>
+      <div class="flex gap-sm flex-center" style="margin-top:1rem">
+        <button class="btn btn-primary" id="retry-nav">Retry</button>
+        <a class="btn btn-outline" href="#/">Go Home</a>
+      </div>
+    </div>
+  `;
+  qs('#retry-nav', host)?.addEventListener('click', () => dispatch(nav));
 }
 
 function resolveActiveNav(path){
@@ -117,5 +159,12 @@ function resolveActiveNav(path){
   return `#${path === '/' ? '/' : path}`;
 }
 
+function prefetchRoutes(){
+  const run = () => ROUTES.forEach((r) => r.load().catch(() => {}));
+  if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 1800 });
+  else setTimeout(run, 400);
+}
+
 onRouteChange(dispatch);
 startRouter();
+prefetchRoutes();

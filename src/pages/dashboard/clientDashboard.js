@@ -22,12 +22,15 @@ export async function mount(container){
         <div class="panel">
           <div class="panel-head"><h4>Booking history</h4></div>
           ${dataTable({
-            columns: ['Trip', 'Type', 'Date', 'Travellers', 'Total', 'Status'],
+            columns: ['Trip', 'Type', 'Date', 'Travellers', 'Children', 'Total', 'Status'],
             rows: bookings.map((b) => [
               b.title,
               b.type === 'package' ? 'Package' : 'Custom',
               formatDate(b.date),
               String(b.travelers || 1),
+              b.children
+                ? `${b.children} \u2014 ${(b.childrenDetails || []).map((c) => `${c.name} (${c.age})`).join(', ') || 'details pending'}`
+                : '\u2014',
               formatMoney(b.totalKes),
               statusBadge(b.status),
             ]),
@@ -39,4 +42,8 @@ export async function mount(container){
   `);
 
   renderSidebar(qs('#dash-sidebar-mount', container), { role: 'client', active: '#/dashboard' });
+}
+
+export async function activate(container){
+  await mount(container);
 }

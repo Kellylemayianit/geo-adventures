@@ -15,6 +15,13 @@ export function isAdmin(){
   const u = getStoredUser();
   return !!u && u.role === 'admin';
 }
+export function isStaff(){
+  const u = getStoredUser();
+  return !!u && (u.role === 'admin' || u.role === 'moderator');
+}
+export function staffHome(){
+  return isStaff() ? '#/admin' : '#/dashboard';
+}
 export function onAuthChange(fn){
   listeners.add(fn);
   return () => listeners.delete(fn);

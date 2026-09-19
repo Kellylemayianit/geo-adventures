@@ -19,7 +19,8 @@ export async function mount(container){
     </div>
   `);
 
-  renderSidebar(qs('#dash-sidebar-mount', container), { role: 'admin', active: '#/admin/bookings' });
+  renderSidebar(qs('#dash-sidebar-mount', container), { role: 'staff', active: '#/admin/bookings' });
+  container._refresh = refresh;
   await refresh();
 
   async function refresh(){
@@ -59,4 +60,8 @@ export async function mount(container){
       refresh();
     }));
   }
+}
+
+export async function activate(container){
+  if (container._refresh) await container._refresh();
 }

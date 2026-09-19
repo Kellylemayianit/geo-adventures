@@ -1,0 +1,47 @@
+/* Last stylesheet on purpose — phone-first overrides that desktop media
+   queries in component files sometimes miss (wide tables, sticky panels,
+   bottom-nav overlap, unbroken strings). */
+
+html, body{
+  max-width:100%;
+  overflow-x:clip;
+}
+#app-header, #app-main, #app-footer, .page-host{
+  min-width:0;
+  max-width:100%;
+}
+.page-host[hidden], .nav-loading[hidden], .nav-error[hidden]{display:none !important;}
+.nav-loading{padding:2.5rem 1.25rem;text-align:center;}
+
+h1,h2,h3,h4,h5,p,td,th,li,span,a,label{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+.table-wrap{max-width:100%;-webkit-overflow-scrolling:touch;}
+
+@media (max-width: 900px){
+  .container{padding-left:1rem;padding-right:1rem;}
+  .dash-main{min-width:0;}
+  .panel{padding:1rem;overflow-x:auto;}
+  .booking-panel{position:static;}
+  .whatsapp-fab{bottom:5.75rem;right:1rem;}
+  .bottom-nav{
+    padding-bottom:env(safe-area-inset-bottom, 0);
+    justify-content:flex-start;
+  }
+  .hero-copy h1{font-size:1.85rem;}
+  .hero-copy p{font-size:1rem;}
+  .flex, .flex-between, .flex-center{flex-wrap:wrap;}
+}
+
+@media (max-width: 640px){
+  .section{padding:2.25rem 0;}
+  .section-tight{padding:1.5rem 0;}
+  .page-banner{padding:3.25rem 0 2.5rem;}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .qty-stepper button{min-width:44px;min-height:44px;}
+  .data-table th, .data-table td{padding:.65rem .55rem;font-size:.8rem;}
+  .toast-stack{left:1rem;right:1rem;max-width:none;}
+}
