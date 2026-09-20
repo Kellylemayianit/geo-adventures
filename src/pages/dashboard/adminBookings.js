@@ -19,49 +19,51 @@ export async function mount(container){
     </div>
   `);
 
-  renderSidebar(qs('#dash-sidebar-mount', container), { role: 'staff', active: '#/admin/bookings' });
-  container._refresh = refresh;
-  await refresh();
-
-  async function refresh(){
-    const bookings = await getBookings();
-    const panel = qs('#bookings-panel', container);
-    panel.innerHTML = `
-      <div class="panel-head"><h4>All booking requests (${bookings.length})</h4></div>
-      ${dataTable({
-        columns: ['Trip', 'Traveller', 'Phone', 'Date', 'Children', 'Total', 'Status', 'Actions'],
-        rows: bookings.map((b) => [
-          b.title,
-          b.name,
-          b.phone,
-          formatDate(b.date),
-          b.children
-            ? `<span title="${(b.childrenDetails || []).map((c) => `${c.name} (age ${c.age})`).join(', ')}">${b.children} \u2014 ${(b.childrenDetails || []).map((c) => `${c.name} (${c.age})`).join(', ') || 'details pending'}</span>`
-            : '\u2014',
-          formatMoney(b.totalKes),
-          statusBadge(b.status),
-          `<div class="row-actions">
-            <button data-confirm="${b.id}" ${b.status === 'confirmed' ? 'disabled' : ''}>Confirm</button>
-            <button data-cancel="${b.id}" ${b.status === 'cancelled' ? 'disabled' : ''}>Cancel</button>
-          </div>`,
-        ]),
-        emptyMessage: 'No booking requests yet.',
-      })}
-    `;
-
-    qsa('[data-confirm]', panel).forEach((btn) => btn.addEventListener('click', async () => {
-      await setBookingStatus(btn.dataset.confirm, 'confirmed');
-      showToast('Booking confirmed.', 'success');
-      refresh();
-    }));
-    qsa('[data-cancel]', panel).forEach((btn) => btn.addEventListener('click', async () => {
-      await setBookingStatus(btn.dataset.cancel, 'cancelled');
-      showToast('Booking cancelled.', 'default');
-      refresh();
-    }));
-  }
+  renderSidebar(qs('#dash-sidebar-mount', container), { active: '#/admin/bookings' });
+  await refresh(container);
 }
 
+// The SPA keep-alive cache only re-runs mount() once ever per route; this page's data
+// (booking statuses) changes from actions taken elsewhere, so it needs to refetch on
+// every revisit, not just the first.
 export async function activate(container){
-  if (container._refresh) await container._refresh();
+  await refresh(container);
+}
+
+async function refresh(container){
+  const bookings = await getBookings();
+  const panel = qs('#bookings-panel', container);
+  panel.innerHTML = `
+    <div class="panel-head"><h4>All booking requests (${bookings.length})</h4></div>
+    ${dataTable({
+      columns: ['Trip', 'Traveller', 'Phone', 'Date', 'Children', 'Total', 'Status', 'Actions'],
+      rows: bookings.map((b) => [
+        b.title,
+        b.name,
+        b.phone,
+        formatDate(b.date),
+        b.children
+          ? `<span title="${(b.childrenDetails || []).map((c) => `${c.name} (age ${c.age})`).join(', ')}">${b.children} \u2014 ${(b.childrenDetails || []).map((c) => `${c.name} (${c.age})`).join(', ') || 'details pending'}</span>`
+          : '\u2014',
+        formatMoney(b.totalKes),
+        statusBadge(b.status),
+        `<div class="row-actions">
+          <button data-confirm="${b.id}" ${b.status === 'confirmed' ? 'disabled' : ''}>Confirm</button>
+          <button data-cancel="${b.id}" ${b.status === 'cancelled' ? 'disabled' : ''}>Cancel</button>
+        </div>`,
+      ]),
+      emptyMessage: 'No booking requests yet.',
+    })}
+  `;
+
+  qsa('[data-confirm]', panel).forEach((btn) => btn.addEventListener('click', async () => {
+    await setBookingStatus(btn.dataset.confirm, 'confirmed');
+    showToast('Booking confirmed.', 'success');
+    refresh(container);
+  }));
+  qsa('[data-cancel]', panel).forEach((btn) => btn.addEventListener('click', async () => {
+    await setBookingStatus(btn.dataset.cancel, 'cancelled');
+    showToast('Booking cancelled.', 'default');
+    refresh(container);
+  }));
 }

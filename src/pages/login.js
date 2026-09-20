@@ -38,6 +38,6 @@ export async function mount(container){
       return;
     }
     showToast(`Welcome back, ${result.user.name.split(' ')[0]}!`, 'success');
-    navigate((result.user.role === 'admin' || result.user.role === 'moderator') ? '#/admin' : '#/dashboard');
+    navigate(result.user.role === 'admin' ? '#/admin' : '#/dashboard');
   });
 }

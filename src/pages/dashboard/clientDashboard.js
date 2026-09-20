@@ -6,7 +6,6 @@ import { getBookings } from '../../services/dataLoader.js';
 
 export async function mount(container){
   const user = currentUser();
-  const bookings = await getBookings(); // Worker already scopes this to the logged-in user
 
   render(container, `
     <div class="dash-shell">
@@ -19,31 +18,35 @@ export async function mount(container){
           </div>
           <a class="btn btn-amber" href="#/build">Build a new safari</a>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h4>Booking history</h4></div>
-          ${dataTable({
-            columns: ['Trip', 'Type', 'Date', 'Travellers', 'Children', 'Total', 'Status'],
-            rows: bookings.map((b) => [
-              b.title,
-              b.type === 'package' ? 'Package' : 'Custom',
-              formatDate(b.date),
-              String(b.travelers || 1),
-              b.children
-                ? `${b.children} \u2014 ${(b.childrenDetails || []).map((c) => `${c.name} (${c.age})`).join(', ') || 'details pending'}`
-                : '\u2014',
-              formatMoney(b.totalKes),
-              statusBadge(b.status),
-            ]),
-            emptyMessage: 'No bookings yet — build a safari to get started.',
-          })}
-        </div>
+        <div class="panel" id="bookings-panel"></div>
       </main>
     </div>
   `);
 
-  renderSidebar(qs('#dash-sidebar-mount', container), { role: 'client', active: '#/dashboard' });
+  renderSidebar(qs('#dash-sidebar-mount', container), { active: '#/dashboard' });
+  await refresh(container);
 }
 
+// A booking's status can change (staff confirms/cancels it) between visits to this page.
 export async function activate(container){
-  await mount(container);
+  await refresh(container);
+}
+
+async function refresh(container){
+  const bookings = await getBookings(); // Worker already scopes this to the logged-in user
+  qs('#bookings-panel', container).innerHTML = `
+    <div class="panel-head"><h4>Booking history</h4></div>
+    ${dataTable({
+      columns: ['Trip', 'Type', 'Date', 'Travellers', 'Total', 'Status'],
+      rows: bookings.map((b) => [
+        b.title,
+        b.type === 'package' ? 'Package' : 'Custom',
+        formatDate(b.date),
+        String(b.travelers || 1),
+        formatMoney(b.totalKes),
+        statusBadge(b.status),
+      ]),
+      emptyMessage: 'No bookings yet — build a safari to get started.',
+    })}
+  `;
 }

@@ -9,32 +9,34 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,500;600;700&family=Libre+Baskerville:wght@400;700&family=Kaushan+Script&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="styles/tokens.css?v=20260919c">
-<link rel="stylesheet" href="styles/utilities/buttons.css?v=20260919c">
-<link rel="stylesheet" href="styles/components/header.css?v=20260919c">
-<link rel="stylesheet" href="styles/components/hero.css?v=20260919c">
-<link rel="stylesheet" href="styles/components/card.css?v=20260919c">
-<link rel="stylesheet" href="styles/components/booking.css?v=20260919c">
-<link rel="stylesheet" href="styles/components/footer.css?v=20260919c">
-<link rel="stylesheet" href="styles/dashboard/sidebar.css?v=20260919c">
-<link rel="stylesheet" href="styles/dashboard/stat-cards.css?v=20260919c">
-<link rel="stylesheet" href="styles/dashboard/admin.css?v=20260919c">
-<link rel="stylesheet" href="styles/mobile.css?v=20260919c">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/utilities/buttons.css">
+<link rel="stylesheet" href="styles/components/header.css">
+<link rel="stylesheet" href="styles/components/hero.css">
+<link rel="stylesheet" href="styles/components/card.css">
+<link rel="stylesheet" href="styles/components/booking.css">
+<link rel="stylesheet" href="styles/components/footer.css">
+<link rel="stylesheet" href="styles/dashboard/sidebar.css">
+<link rel="stylesheet" href="styles/dashboard/stat-cards.css">
+<link rel="stylesheet" href="styles/dashboard/admin.css">
+<link rel="stylesheet" href="styles/mobile.css">
 
 <!-- Preload modules almost every page needs, so the first navigation to any page doesn't
      serially discover them one import at a time. -->
-<link rel="modulepreload" href="src/utilities/helpers.js?v=20260919c">
-<link rel="modulepreload" href="src/utilities/icons.js?v=20260919c">
-<link rel="modulepreload" href="src/utilities/session.js?v=20260919c">
-<link rel="modulepreload" href="src/utilities/auth.js?v=20260919c">
-<link rel="modulepreload" href="src/utilities/channelLinks.js?v=20260919c">
-<link rel="modulepreload" href="src/services/config.js?v=20260919c">
-<link rel="modulepreload" href="src/services/api.js?v=20260919c">
-<link rel="modulepreload" href="src/services/dataLoader.js?v=20260919c">
-<link rel="modulepreload" href="src/router.js?v=20260919c">
-<link rel="modulepreload" href="src/components/header.js?v=20260919c">
-<link rel="modulepreload" href="src/components/footer.js?v=20260919c">
-<link rel="modulepreload" href="src/components/card.js?v=20260919c">
+<link rel="modulepreload" href="src/utilities/helpers.js">
+<link rel="modulepreload" href="src/utilities/icons.js">
+<link rel="modulepreload" href="src/utilities/session.js">
+<link rel="modulepreload" href="src/utilities/auth.js">
+<link rel="modulepreload" href="src/utilities/channelLinks.js">
+<link rel="modulepreload" href="src/services/config.js">
+<link rel="modulepreload" href="src/services/api.js">
+<link rel="modulepreload" href="src/services/dataLoader.js">
+<link rel="modulepreload" href="src/router.js">
+<link rel="modulepreload" href="src/runtime/spa.js">
+<link rel="modulepreload" href="src/components/header.js">
+<link rel="modulepreload" href="src/components/footer.js">
+<link rel="modulepreload" href="src/components/appBar.js">
+<link rel="modulepreload" href="src/components/card.js">
 </head>
 <body>
 <div id="app-header"></div>
@@ -49,6 +51,6 @@
     document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
-<script type="module" src="src/app.js?v=20260919c"></script>
+<script type="module" src="src/app.js"></script>
 </body>
 </html>

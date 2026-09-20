@@ -1,6 +1,8 @@
 import { icon } from '../../utilities/icons.js';
-import { currentUser, signOut } from '../../utilities/auth.js';
+import { currentUser, signOut, isStaff } from '../../utilities/auth.js';
 import { qs } from '../../utilities/helpers.js';
+
+const ROLE_LABEL = { admin: 'Administrator', moderator: 'Moderator', client: 'Client' };
 
 const CLIENT_LINKS = [
   { label: 'My Bookings', href: '#/dashboard', match: '#/dashboard', icon: 'dashboard' },
@@ -20,9 +22,12 @@ const ADMIN_LINKS = [
 
 export function renderSidebar(root, { role, active }){
   const user = currentUser();
-  const staff = user?.role === 'admin' || user?.role === 'moderator' || role === 'admin' || role === 'staff';
-  const links = staff ? ADMIN_LINKS : CLIENT_LINKS;
-  const roleLabel = user?.role === 'admin' ? 'Administrator' : user?.role === 'moderator' ? 'Moderator' : 'Client';
+  // `role` stays supported for any caller that still passes it explicitly, but the
+  // source of truth is always isStaff() - so admins, moderators, and any page that
+  // forgets to pass role all land on the correct sidebar.
+  const staffView = role ? role !== 'client' : isStaff();
+  const links = staffView ? ADMIN_LINKS : CLIENT_LINKS;
+  const roleLabel = ROLE_LABEL[user?.role] || (staffView ? 'Staff' : 'Client');
   const html = `
     <aside class="dash-sidebar">
       <div class="dash-user">

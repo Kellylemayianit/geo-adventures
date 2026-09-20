@@ -5,8 +5,7 @@ compatibility_date = "2024-09-23"
 [[d1_databases]]
 binding = "DB"
 database_name = "geo-adventures-db"
-database_id = "2ee58e69-afb6-4c93-9f05-7ba5641c57d3"
-
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
 
 [vars]
 ALLOWED_ORIGIN = "https://geo-adventures.pages.dev"

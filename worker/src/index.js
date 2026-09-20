@@ -75,8 +75,24 @@ async function listDestinations(env){
   const { results } = await env.DB.prepare('SELECT * FROM destinations').all();
   return results.map(rowDestination);
 }
+function isAdmin(user){ return !!user && user.role === 'admin'; }
+function isStaff(user){ return !!user && (user.role === 'admin' || user.role === 'moderator'); }
+
+const ALLOWED_ROLES = ['client', 'moderator', 'admin'];
+
 function rowDestination(r){
-  return { ...r, activities: JSON.parse(r.activities || '[]') };
+  return {
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    region: r.region,
+    tagline: r.tagline,
+    description: r.description,
+    image: r.image,
+    activities: JSON.parse(r.activities || '[]'),
+    bestFor: r.best_for,
+    priceFromKes: r.price_from_kes,
+  };
 }
 
 async function listPackages(env){
@@ -101,6 +117,7 @@ function rowBooking(r){
     id: r.id, userId: r.user_id, type: r.type, title: r.title, packageId: r.package_id,
     destinationIds: r.destination_ids ? JSON.parse(r.destination_ids) : [],
     stayTier: r.stay_tier, transportId: r.transport_id, travelers: r.travelers, days: r.days,
+    children: r.children || 0, childrenDetails: r.children_details ? JSON.parse(r.children_details) : [],
     name: r.name, phone: r.phone, email: r.email, date: r.date, totalKes: r.total_kes,
     status: r.status, createdAt: r.created_at,
   };
@@ -208,13 +225,28 @@ export default {
       // ---- Admin: list users / reset a user's password by hand (WhatsApp-mediated) ----
       if (path === '/api/admin/users' && method === 'GET'){
         const authUser = await getAuthUser(request, env);
-        if (!authUser || authUser.role !== 'admin') return err('Admin only.', 403, env);
+        if (!isStaff(authUser)) return err('Staff only.', 403, env);
         const { results } = await env.DB.prepare('SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC').all();
         return json(results, 200, env);
       }
+      if (path.match(/^\/api\/admin\/users\/[^/]+\/role$/) && method === 'PATCH'){
+        const authUser = await getAuthUser(request, env);
+        if (!isAdmin(authUser)) return err('Only an administrator can change roles.', 403, env);
+        const userId = path.split('/')[4];
+        const { role } = await request.json();
+        if (!ALLOWED_ROLES.includes(role)) return err('Role must be client, moderator, or admin.', 400, env);
+        const target = await env.DB.prepare('SELECT id, role FROM users WHERE id = ?').bind(userId).first();
+        if (!target) return err('User not found.', 404, env);
+        if (target.role === 'admin' && role !== 'admin'){
+          const { c } = await env.DB.prepare("SELECT COUNT(*) AS c FROM users WHERE role = 'admin'").first();
+          if (c <= 1) return err('Cannot demote the last administrator.', 400, env);
+        }
+        await env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(role, userId).run();
+        return json({ ok: true, id: userId, role }, 200, env);
+      }
       if (path.match(/^\/api\/admin\/users\/[^/]+\/reset-password$/) && method === 'POST'){
         const authUser = await getAuthUser(request, env);
-        if (!authUser || authUser.role !== 'admin') return err('Admin only.', 403, env);
+        if (!isStaff(authUser)) return err('Staff only.', 403, env);
         const userId = path.split('/')[4];
         const { newPassword } = await request.json();
         if (!newPassword || newPassword.length < 4) return err('New password must be at least 4 characters.', 400, env);
@@ -229,7 +261,7 @@ export default {
         const authUser = await getAuthUser(request, env);
         if (!authUser) return err('Login required.', 401, env);
         let rows;
-        if (authUser.role === 'admin'){
+        if (isStaff(authUser)){
           rows = (await env.DB.prepare('SELECT * FROM bookings ORDER BY created_at DESC').all()).results;
         } else {
           rows = (await env.DB.prepare('SELECT * FROM bookings WHERE user_id = ? ORDER BY created_at DESC').bind(authUser.id).all()).results;
@@ -247,12 +279,13 @@ export default {
         const id = 'bk' + Date.now();
         const createdAt = new Date().toISOString();
         await env.DB.prepare(`
-          INSERT INTO bookings (id, user_id, type, title, package_id, destination_ids, stay_tier, transport_id, travelers, days, name, phone, email, date, total_kes, status, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+          INSERT INTO bookings (id, user_id, type, title, package_id, destination_ids, stay_tier, transport_id, travelers, days, children, children_details, name, phone, email, date, total_kes, status, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
         `).bind(
           id, authUser?.id || null, body.type, body.title, body.packageId || null,
           body.destinationIds ? JSON.stringify(body.destinationIds) : null,
           body.stayTier || null, body.transportId || null, body.travelers || 1, body.days || null,
+          body.children || 0, body.childrenDetails ? JSON.stringify(body.childrenDetails) : null,
           body.name, body.phone, body.email || null, body.date || null, body.totalKes, createdAt,
         ).run();
         return json({ id, status: 'pending', createdAt }, 201, env);
@@ -260,7 +293,7 @@ export default {
 
       if (path.match(/^\/api\/bookings\/[^/]+$/) && method === 'PATCH'){
         const authUser = await getAuthUser(request, env);
-        if (!authUser || authUser.role !== 'admin') return err('Admin only.', 403, env);
+        if (!isStaff(authUser)) return err('Staff only.', 403, env);
         const id = path.split('/').pop();
         const { status } = await request.json();
         if (!['pending', 'confirmed', 'cancelled'].includes(status)) return err('Invalid status.', 400, env);

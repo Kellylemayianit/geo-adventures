@@ -58,6 +58,7 @@ async function dispatch({ path, query, matched }){
     } catch (e){
       if (stillCurrent()) paintError(e, { path, query, matched });
     }
+    renderFooter(footerEl);
     window.scrollTo(0, 0);
     return;
   }
