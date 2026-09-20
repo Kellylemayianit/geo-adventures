@@ -1,6 +1,7 @@
-import { render, qs, qsa, formatMoney, showToast } from '../../utilities/helpers.js';
+import { render, qs, formatMoney, showToast } from '../../utilities/helpers.js';
 import { renderSidebar } from '../../components/admin/sidebar.js';
 import { dataTable } from '../../components/admin/table.js';
+import { actionMenu, wireActionMenus } from '../../components/admin/actionMenu.js';
 import { getPackages } from '../../services/dataLoader.js';
 
 export async function mount(container){
@@ -23,7 +24,7 @@ export async function mount(container){
             columns: ['Package', 'Class', 'Days', 'Price / person', 'Actions'],
             rows: packages.map((p) => [
               p.title, p.classLabel, String(p.days), formatMoney(p.pricePerPersonKes),
-              `<div class="row-actions"><button data-edit="${p.id}">Edit</button><button data-remove="${p.id}">Remove</button></div>`,
+              actionMenu(p.id, [{ action: 'edit', label: 'Edit' }, { action: 'remove', label: 'Remove', danger: true }]),
             ]),
           })}
         </div>
@@ -32,10 +33,9 @@ export async function mount(container){
     </div>
   `);
 
-  renderSidebar(qs('#dash-sidebar-mount', container), { role: 'admin', active: '#/admin/packages' });
+  renderSidebar(qs('#dash-sidebar-mount', container), { active: '#/admin/packages' });
 
   const notice = () => showToast('Package editing will go live once the backend is connected.', 'default');
   qs('#add-package', container).addEventListener('click', notice);
-  qsa('[data-edit]', container).forEach((b) => b.addEventListener('click', notice));
-  qsa('[data-remove]', container).forEach((b) => b.addEventListener('click', notice));
+  wireActionMenus(container, notice);
 }

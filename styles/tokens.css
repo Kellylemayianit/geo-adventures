@@ -16,6 +16,7 @@
   --ink-700:#333333;
   --ink-500:#666666;
   --ink-300:#999999;
+  --surface-dark:#0c121d; /* fixed - never redefined in dark mode. For surfaces (footer/sidebar/app-bar) that stay dark in BOTH themes; --ink-900 is for adaptive text/headings only. */
   --paper:#ffffff;
   --paper-dim:#fafafa;
   --line:#e7e7e7;

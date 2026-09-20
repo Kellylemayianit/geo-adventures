@@ -54,7 +54,7 @@
 .currency-switch button{
   border:0;background:transparent;padding:.3rem .75rem;border-radius:999px;font-size:var(--fs-12);font-weight:700;color:var(--ink-500);
 }
-.currency-switch button[aria-pressed="true"]{background:var(--ink-900);color:#fff;}
+.currency-switch button[aria-pressed="true"]{background:var(--surface-dark);color:#fff;}
 
 .select-field{
   width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--ink-700);

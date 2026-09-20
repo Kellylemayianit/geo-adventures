@@ -19,6 +19,25 @@ table.data-table{width:100%;border-collapse:collapse;font-size:var(--fs-14);}
 .status-badge.pending{background:var(--amber-tint-bg);color:var(--amber-800);}
 .status-badge.cancelled{background:var(--danger-tint-bg);color:var(--danger);}
 
+.action-menu{position:relative;display:inline-block;}
+.action-menu-trigger{
+  border:1px solid var(--line);background:var(--paper);border-radius:var(--radius-sm);
+  padding:.4rem .6rem;color:var(--ink-500);display:flex;align-items:center;
+}
+.action-menu-trigger:hover{border-color:var(--green-600);color:var(--green-700);}
+.action-menu-list{
+  position:absolute;top:100%;right:0;margin-top:.3rem;min-width:140px;z-index:40;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow);padding:.3rem;
+}
+.action-menu-list button{
+  display:block;width:100%;text-align:left;padding:.5rem .7rem;border:0;background:transparent;
+  border-radius:var(--radius-sm);font-size:var(--fs-14);color:var(--ink-700);
+}
+.action-menu-list button:hover{background:var(--paper-dim);}
+.action-menu-list button.is-danger{color:var(--danger);}
+.action-menu-list button.is-danger:hover{background:var(--danger-tint-bg);}
+
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem 1.4rem;min-width:0;}
 .form-grid > *{min-width:0;}
 .form-grid .full{grid-column:1/-1;}

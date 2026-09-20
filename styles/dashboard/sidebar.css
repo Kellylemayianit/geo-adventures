@@ -3,7 +3,7 @@
 
 .app-bar{
   position:sticky;top:0;z-index:60;
-  background:var(--ink-900);border-bottom:1px solid rgba(255,255,255,.1);
+  background:var(--surface-dark);border-bottom:1px solid rgba(255,255,255,.1);
   height:var(--appbar-h);display:flex;align-items:center;
 }
 .app-bar .brand{color:#fff;}
@@ -24,7 +24,7 @@
   .app-bar-actions .btn-ghost{padding:.5rem .6rem;font-size:.7rem;}
 }
 .dash-sidebar{
-  background:var(--ink-900);color:rgba(255,255,255,.8);padding:1.5rem 1rem;
+  background:var(--surface-dark);color:rgba(255,255,255,.8);padding:1.5rem 1rem;
 }
 .dash-sidebar .dash-user{display:flex;align-items:center;gap:.7rem;padding:.5rem .4rem 1.3rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1rem;}
 .dash-sidebar .dash-user .avatar{width:40px;height:40px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;}
