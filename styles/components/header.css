@@ -91,3 +91,7 @@
   .nav-actions > .btn{display:none;}
   .brand{font-size:1.05rem;}
 }
+@media (max-width: 360px){
+  /* Smallest phones (iPhone SE etc) - drop "Kenya" so "Geo Adventures" never wraps or clips. */
+  .brand .brand-sub{display:none;}
+}

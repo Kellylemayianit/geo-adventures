@@ -32,10 +32,10 @@
   --font-body:"Nunito Sans", -apple-system, Segoe UI, sans-serif;
   --font-script:"Kaushan Script", cursive;
 
-  --fs-60:3.4rem;
-  --fs-40:2.2rem;
-  --fs-28:1.65rem;
-  --fs-20:1.2rem;
+  --fs-60:clamp(2.1rem, 1.7rem + 2.2vw, 3.4rem);
+  --fs-40:clamp(1.6rem, 1.35rem + 1.4vw, 2.2rem);
+  --fs-28:clamp(1.3rem, 1.15rem + 0.8vw, 1.65rem);
+  --fs-20:clamp(1.05rem, 0.95rem + 0.5vw, 1.2rem);
   --fs-16:1rem;
   --fs-14:.875rem;
   --fs-12:.75rem;
@@ -115,10 +115,10 @@ p{margin:0 0 1em;overflow-wrap:break-word;}
   width:100%;
   max-width:var(--container);
   margin:0 auto;
-  padding:0 1.25rem;
+  padding:0 clamp(1rem, 0.75rem + 1vw, 1.25rem);
 }
-.section{padding:4.5rem 0;}
-.section-tight{padding:2.5rem 0;}
+.section{padding:clamp(2.25rem, 1.6rem + 3vw, 4.5rem) 0;}
+.section-tight{padding:clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem) 0;}
 .grid{display:grid;gap:var(--gap);min-width:0;}
 .grid > *{min-width:0;} /* grid items don't shrink below content width by default - this is the #1 cause of clipped mobile content */
 .grid-2{grid-template-columns:repeat(2,1fr);}
@@ -146,13 +146,10 @@ p{margin:0 0 1em;overflow-wrap:break-word;}
 :focus-visible{outline:3px solid var(--amber-600);outline-offset:2px;}
 
 @media (max-width: 991px){
-  h1{font-size:2.4rem;}
-  h2{font-size:1.8rem;}
   .grid-4{grid-template-columns:repeat(2,1fr);}
   .grid-3{grid-template-columns:repeat(2,1fr);}
 }
 @media (max-width: 640px){
-  .section{padding:3rem 0;}
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
 }
 @media (prefers-reduced-motion: reduce){
